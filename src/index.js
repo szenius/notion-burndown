@@ -98,7 +98,7 @@ const updateDailySummaryTable = async (sprint, pointsLeft) => {
   });
 };
 
-const getPointsLeftByDay = async (sprint, start, end) => {
+const getPointsLeftByDay = async (sprint, start) => {
   const response = await notion.databases.query({
     database_id: DB_ID_DAILY_SUMMARY,
     filter: {
@@ -129,8 +129,8 @@ const getPointsLeftByDay = async (sprint, start, end) => {
     }
     pointsLeftByDay[day] = Points.number;
   });
-  const numDaysInSprint = moment(end).startOf("day").diff(start, "days");
-  for (let i = 0; i < numDaysInSprint; i += 1) {
+  const numDaysSinceSprintStart = moment().startOf("day").diff(start, "days");
+  for (let i = 0; i < numDaysSinceSprintStart; i += 1) {
     if (!pointsLeftByDay[i]) {
       pointsLeftByDay[i] = 0;
     }
@@ -185,6 +185,15 @@ const generateChart = async (data, labels) => {
   await chart.toFile("burndown.png");
 };
 
+const getChartLabels = (start, end) => {
+  const chartLabels = [];
+  const numDaysInSprint = moment(end).startOf("day").diff(start, "days");
+  for (let i = 1; i <= numDaysInSprint; i += 1) {
+    chartLabels.push(i);
+  }
+  return chartLabels;
+};
+
 const updateSprintSummary = async () => {
   const { sprint, start, end } = await getLatestSprintSummary();
   // eslint-disable-next-line no-console
@@ -207,10 +216,8 @@ const updateSprintSummary = async () => {
   });
 
   const chartData = await getPointsLeftByDay(sprint, start, end);
-  await generateChart(
-    chartData.slice(0, moment().startOf("day").diff(start) + 1),
-    chartData.map((_, i) => i + 1)
-  );
+  const chartLabels = getChartLabels(start, end);
+  await generateChart(chartData, chartLabels);
   // eslint-disable-next-line no-console
   console.log({ message: "Generated burndown chart", sprint, chartData });
 };
