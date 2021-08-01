@@ -3,16 +3,27 @@ import moment from "moment";
 import ChartJSImage from "chart.js-image";
 
 const notion = new Client({ auth: process.env.NOTION_KEY });
-const databaseIdBacklog = process.env.NOTION_DATABASE_ID_BACKLOG;
-const databaseIdSprintSummary = process.env.NOTION_DATABASE_ID_SPRINT_SUMMARY;
-const databaseIdPointsLeft = process.env.NOTION_DATABASE_ID_POINTS_LEFT;
+
+const DATABASE_ID_BACKLOG = process.env.NOTION_DATABASE_ID_BACKLOG;
+const DATABASE_ID_SPRINT_SUMMARY =
+  process.env.NOTION_DATABASE_ID_SPRINT_SUMMARY;
+const DB_ID_DAILY_SUMMARY = process.env.NOTION_DATABASE_ID_DAILY_SUMMARY;
+
+// TODO: allow as input params
+const BACKLOG_PROPERTY_SPRINT = "Sprint";
+const BACKLOG_PROPERTY_STATUS_LIST_DEV_DONE = [
+  "Ready to Deploy",
+  "DONE (In Production 🙌)",
+  "DONE (No action required)",
+];
+const BACKLOG_PROPERTY_STORY_POINTS = "Story Estimate";
 
 const getLatestSprintSummary = async () => {
   const response = await notion.databases.query({
-    database_id: databaseIdSprintSummary,
+    database_id: DATABASE_ID_SPRINT_SUMMARY,
     sorts: [
       {
-        property: "Sprint",
+        property: BACKLOG_PROPERTY_SPRINT,
         direction: "descending",
       },
     ],
@@ -28,29 +39,41 @@ const getLatestSprintSummary = async () => {
 
 const countPointsLeftInSprint = async (sprint) => {
   const response = await notion.databases.query({
-    database_id: databaseIdBacklog,
+    database_id: DATABASE_ID_BACKLOG,
     filter: {
-      property: "Sprint",
-      text: {
+      property: BACKLOG_PROPERTY_SPRINT,
+      select: {
         equals: `Sprint ${sprint}`,
       },
     },
   });
   const sprintStories = response.results;
   const ongoingStories = sprintStories.filter(
-    (item) => item.properties.Status.select.name !== "Done 🙌"
+    (item) =>
+      !BACKLOG_PROPERTY_STATUS_LIST_DEV_DONE.includes(
+        item.properties.Status.select.name
+      )
   );
-  return ongoingStories.reduce(
-    (accum, item) => accum + item.properties.Points.number,
-    0
-  );
+  return ongoingStories.reduce((accum, item) => {
+    if (item.properties[BACKLOG_PROPERTY_STORY_POINTS]) {
+      // Only including stories with numeric estimates
+      const points = parseInt(
+        item.properties[BACKLOG_PROPERTY_STORY_POINTS].select.name,
+        10
+      );
+      if (!Number.isNaN(points)) {
+        return accum + points;
+      }
+    }
+    return accum;
+  }, 0);
 };
 
-const updatePointsLeftTable = async (sprint, pointsLeft) => {
+const updateDailySummaryTable = async (sprint, pointsLeft) => {
   const today = moment().startOf("day").format("YYYY-MM-DD");
   await notion.pages.create({
     parent: {
-      database_id: databaseIdPointsLeft,
+      database_id: DB_ID_DAILY_SUMMARY,
     },
     properties: {
       Name: {
@@ -77,7 +100,7 @@ const updatePointsLeftTable = async (sprint, pointsLeft) => {
 
 const getPointsLeftByDay = async (sprint, start, end) => {
   const response = await notion.databases.query({
-    database_id: databaseIdPointsLeft,
+    database_id: DB_ID_DAILY_SUMMARY,
     filter: {
       property: "Sprint",
       number: {
@@ -106,7 +129,7 @@ const getPointsLeftByDay = async (sprint, start, end) => {
     }
     pointsLeftByDay[day] = Points.number;
   });
-  const numDaysInSprint = moment().startOf("day").diff(start, "days");
+  const numDaysInSprint = moment(end).startOf("day").diff(start, "days");
   for (let i = 0; i < numDaysInSprint; i += 1) {
     if (!pointsLeftByDay[i]) {
       pointsLeftByDay[i] = 0;
@@ -164,13 +187,32 @@ const generateChart = async (data, labels) => {
 
 const updateSprintSummary = async () => {
   const { sprint, start, end } = await getLatestSprintSummary();
+  // eslint-disable-next-line no-console
+  console.log({ message: "Found latest sprint", sprint, start, end });
+
   const pointsLeftInSprint = await countPointsLeftInSprint(sprint);
-  await updatePointsLeftTable(sprint, pointsLeftInSprint);
+  // eslint-disable-next-line no-console
+  console.log({
+    message: "Counted points left in sprint",
+    sprint,
+    pointsLeftInSprint,
+  });
+
+  await updateDailySummaryTable(sprint, pointsLeftInSprint);
+  // eslint-disable-next-line no-console
+  console.log({
+    message: "Updated daily summary table",
+    sprint,
+    pointsLeftInSprint,
+  });
+
   const chartData = await getPointsLeftByDay(sprint, start, end);
   await generateChart(
     chartData.slice(0, moment().startOf("day").diff(start) + 1),
-    chartData.map((_, i) => i)
+    chartData.map((_, i) => i + 1)
   );
+  // eslint-disable-next-line no-console
+  console.log({ message: "Generated burndown chart", sprint, chartData });
 };
 
 updateSprintSummary();
