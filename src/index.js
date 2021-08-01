@@ -6,23 +6,18 @@ import log from "loglevel";
 const notion = new Client({ auth: process.env.NOTION_KEY });
 log.setLevel("info");
 
-const DATABASE_ID_BACKLOG = process.env.NOTION_DATABASE_ID_BACKLOG;
-const DATABASE_ID_SPRINT_SUMMARY =
-  process.env.NOTION_DATABASE_ID_SPRINT_SUMMARY;
-const DB_ID_DAILY_SUMMARY = process.env.NOTION_DATABASE_ID_DAILY_SUMMARY;
-
-// TODO: allow as input params
-const BACKLOG_PROPERTY_SPRINT = "Sprint";
-const BACKLOG_PROPERTY_STATUS_LIST_DEV_DONE = [
-  "Ready to Deploy",
-  "DONE (In Production 🙌)",
-  "DONE (No action required)",
-];
-const BACKLOG_PROPERTY_STORY_POINTS = "Story Estimate";
+const {
+  DATABASE_ID_BACKLOG: DB_ID_BACKLOG,
+  DATABASE_ID_SPRINT_SUMMARY: DB_ID_SPRINT_SUMMARY,
+  DATABASE_ID_DAILY_SUMMARY: DB_ID_DAILY_SUMMARY,
+  BACKLOG_PROPERTY_SPRINT,
+  BACKLOG_PROPERTY_EXCLUDE_STATUS_PATTERN,
+  BACKLOG_PROPERTY_STORY_POINTS,
+} = process.env;
 
 const getLatestSprintSummary = async () => {
   const response = await notion.databases.query({
-    database_id: DATABASE_ID_SPRINT_SUMMARY,
+    database_id: DB_ID_SPRINT_SUMMARY,
     sorts: [
       {
         property: BACKLOG_PROPERTY_SPRINT,
@@ -41,7 +36,7 @@ const getLatestSprintSummary = async () => {
 
 const countPointsLeftInSprint = async (sprint) => {
   const response = await notion.databases.query({
-    database_id: DATABASE_ID_BACKLOG,
+    database_id: DB_ID_BACKLOG,
     filter: {
       property: BACKLOG_PROPERTY_SPRINT,
       select: {
@@ -52,7 +47,7 @@ const countPointsLeftInSprint = async (sprint) => {
   const sprintStories = response.results;
   const ongoingStories = sprintStories.filter(
     (item) =>
-      !BACKLOG_PROPERTY_STATUS_LIST_DEV_DONE.includes(
+      !new RegExp(BACKLOG_PROPERTY_EXCLUDE_STATUS_PATTERN).test(
         item.properties.Status.select.name
       )
   );
