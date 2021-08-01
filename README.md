@@ -33,3 +33,7 @@ You will need to schedule this script to run once every day.
 Reference [this Notion page](https://foregoing-cub-523.notion.site/Notion-Burndown-Chart-390ba59cef094387900a26f75c108385) to see how I set up my three databases.
 
 The configurations for this example are found in [.env.template](./.env.template).
+
+## Future Work
+
+See issues.
