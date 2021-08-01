@@ -16,7 +16,7 @@ This goes out to all of us who chose to put our scrum boards on Notion even thou
 3. [Give your integration access to all 3 databases.](https://developers.notion.com/docs/getting-started#step-2-share-a-database-with-your-integration)
 4. Clone this project.
 5. Install dependencies by `npm i`.
-6. Set up the .env file. Reference the .env.example and replace the values accordingly.
+6. Set up the .env file. Reference the [.env.example](./.env.example) file and replace the values accordingly.
 
 ## Usage
 
@@ -28,6 +28,8 @@ A burndown chart PNG file should be generated in the project root directory.
 
 You will need to schedule this script to run once every day.
 
-## Example
+## Notion Template
 
 Reference [this Notion page](https://foregoing-cub-523.notion.site/Notion-Burndown-Chart-390ba59cef094387900a26f75c108385) to see how I set up my three databases.
+
+The configurations for this example are found in [.env.template](./.env.template).
