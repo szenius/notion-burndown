@@ -158,6 +158,7 @@ const generateChart = async (data, labels) => {
           display: true,
           text: "Sprint Burndown",
         },
+        legend: { display: false },
         scales: {
           xAxes: [
             {
@@ -173,6 +174,10 @@ const generateChart = async (data, labels) => {
               scaleLabel: {
                 display: true,
                 labelString: "Points Left",
+              },
+              ticks: {
+                beginAtZero: true,
+                max: Math.max(...data),
               },
             },
           ],
