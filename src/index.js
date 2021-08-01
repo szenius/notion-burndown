@@ -139,6 +139,12 @@ const getPointsLeftByDay = async (sprint, start) => {
 };
 
 const generateChart = async (data, labels) => {
+  const pointsPerDay = data[0] / (labels[labels.length - 1] - 1);
+  const constantLine = labels.map(
+    (label) => data[0] - pointsPerDay * (label - 1)
+  );
+  // eslint-disable-next-line no-console
+  console.log({ constantLine });
   const chart = ChartJSImage()
     .chart({
       type: "line",
@@ -147,9 +153,15 @@ const generateChart = async (data, labels) => {
         datasets: [
           {
             label: "Burndown",
-            borderColor: "rgb(255,+99,+132)",
+            borderColor: "#ef4444",
             backgroundColor: "rgba(255,+99,+132,+.5)",
             data,
+          },
+          {
+            label: "Constant",
+            borderColor: "#cad0d6",
+            backgroundColor: "rgba(54,+162,+235,+.5)",
+            data: constantLine,
           },
         ],
       },
@@ -204,21 +216,21 @@ const updateSprintSummary = async () => {
   // eslint-disable-next-line no-console
   console.log({ message: "Found latest sprint", sprint, start, end });
 
-  const pointsLeftInSprint = await countPointsLeftInSprint(sprint);
-  // eslint-disable-next-line no-console
-  console.log({
-    message: "Counted points left in sprint",
-    sprint,
-    pointsLeftInSprint,
-  });
+  // const pointsLeftInSprint = await countPointsLeftInSprint(sprint);
+  // // eslint-disable-next-line no-console
+  // console.log({
+  //   message: "Counted points left in sprint",
+  //   sprint,
+  //   pointsLeftInSprint,
+  // });
 
-  await updateDailySummaryTable(sprint, pointsLeftInSprint);
-  // eslint-disable-next-line no-console
-  console.log({
-    message: "Updated daily summary table",
-    sprint,
-    pointsLeftInSprint,
-  });
+  // await updateDailySummaryTable(sprint, pointsLeftInSprint);
+  // // eslint-disable-next-line no-console
+  // console.log({
+  //   message: "Updated daily summary table",
+  //   sprint,
+  //   pointsLeftInSprint,
+  // });
 
   const chartData = await getPointsLeftByDay(sprint, start, end);
   const chartLabels = getChartLabels(start, end);
