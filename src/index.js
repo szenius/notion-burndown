@@ -1,8 +1,10 @@
 import { Client } from "@notionhq/client";
 import moment from "moment";
 import ChartJSImage from "chart.js-image";
+import log from "loglevel";
 
 const notion = new Client({ auth: process.env.NOTION_KEY });
+log.setLevel("info");
 
 const DATABASE_ID_BACKLOG = process.env.NOTION_DATABASE_ID_BACKLOG;
 const DATABASE_ID_SPRINT_SUMMARY =
@@ -120,12 +122,13 @@ const getPointsLeftByDay = async (sprint, start) => {
     const { Date, Points } = properties;
     const day = moment(Date.date.start).diff(start, "days");
     if (pointsLeftByDay[day]) {
-      // eslint-disable-next-line no-console
-      console.warn({
-        message: "Found duplicate entry",
-        date: Date.date.start,
-        points: Points.number,
-      });
+      log.warn(
+        JSON.stringify({
+          message: "Found duplicate entry",
+          date: Date.date.start,
+          points: Points.number,
+        })
+      );
     }
     pointsLeftByDay[day] = Points.number;
   });
@@ -143,8 +146,6 @@ const generateChart = async (data, labels) => {
   const constantLine = labels.map(
     (label) => data[0] - pointsPerDay * (label - 1)
   );
-  // eslint-disable-next-line no-console
-  console.log({ constantLine });
   const chart = ChartJSImage()
     .chart({
       type: "line",
@@ -213,30 +214,34 @@ const getChartLabels = (start, end) => {
 
 const updateSprintSummary = async () => {
   const { sprint, start, end } = await getLatestSprintSummary();
-  // eslint-disable-next-line no-console
-  console.log({ message: "Found latest sprint", sprint, start, end });
+  log.info(
+    JSON.stringify({ message: "Found latest sprint", sprint, start, end })
+  );
 
-  // const pointsLeftInSprint = await countPointsLeftInSprint(sprint);
-  // // eslint-disable-next-line no-console
-  // console.log({
-  //   message: "Counted points left in sprint",
-  //   sprint,
-  //   pointsLeftInSprint,
-  // });
+  const pointsLeftInSprint = await countPointsLeftInSprint(sprint);
+  log.info(
+    JSON.stringify({
+      message: "Counted points left in sprint",
+      sprint,
+      pointsLeftInSprint,
+    })
+  );
 
-  // await updateDailySummaryTable(sprint, pointsLeftInSprint);
-  // // eslint-disable-next-line no-console
-  // console.log({
-  //   message: "Updated daily summary table",
-  //   sprint,
-  //   pointsLeftInSprint,
-  // });
+  await updateDailySummaryTable(sprint, pointsLeftInSprint);
+  log.info(
+    JSON.stringify({
+      message: "Updated daily summary table",
+      sprint,
+      pointsLeftInSprint,
+    })
+  );
 
   const chartData = await getPointsLeftByDay(sprint, start, end);
   const chartLabels = getChartLabels(start, end);
   await generateChart(chartData, chartLabels);
-  // eslint-disable-next-line no-console
-  console.log({ message: "Generated burndown chart", sprint, chartData });
+  log.info(
+    JSON.stringify({ message: "Generated burndown chart", sprint, chartData })
+  );
 };
 
 updateSprintSummary();
