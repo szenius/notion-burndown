@@ -27,3 +27,7 @@ npm start
 A burndown chart PNG file should be generated in the project root directory.
 
 You will need to schedule this script to run once every day.
+
+## Example
+
+Reference [this Notion page](https://foregoing-cub-523.notion.site/Notion-Burndown-Chart-390ba59cef094387900a26f75c108385) to see how I set up my three databases.
