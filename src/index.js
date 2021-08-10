@@ -140,7 +140,7 @@ const getPointsLeftByDay = async (sprint, start) => {
   return pointsLeftByDay;
 };
 
-const generateChart = async (data, labels) => {
+const generateChart = async (data, labels, filenamePrefix) => {
   const pointsPerDay = data[0] / (labels[labels.length - 1] - 1);
   const constantLine = labels.map(
     (label) => data[0] - pointsPerDay * (label - 1)
@@ -199,7 +199,7 @@ const generateChart = async (data, labels) => {
     .backgroundColor("white")
     .width(500) // 500px
     .height(300); // 300px
-  await chart.toFile("burndown.png");
+  await chart.toFile(`${filenamePrefix}-burndown.png`);
 };
 
 const getChartLabels = (start, end) => {
@@ -238,7 +238,7 @@ const updateSprintSummary = async () => {
   const chartData = await getPointsLeftByDay(sprint, start, end);
   const chartLabels = getChartLabels(start, end);
   log.info(JSON.stringify({ chartLabels }));
-  await generateChart(chartData, chartLabels);
+  await generateChart(chartData, chartLabels, `${Date.now()}-${sprint}`);
   log.info(
     JSON.stringify({ message: "Generated burndown chart", sprint, chartData })
   );
