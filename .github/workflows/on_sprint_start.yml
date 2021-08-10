@@ -1,0 +1,12 @@
+on:
+  schedule:
+    - cron: "0 8 * * 2"
+
+jobs:
+  run_schedule:
+    runs-on: ubuntu-latest
+    steps:
+      - run: npm i
+      - run: npm start
+        with:
+          mode: sprint_start

@@ -2,9 +2,13 @@ import { Client } from "@notionhq/client";
 import moment from "moment";
 import ChartJSImage from "chart.js-image";
 import log from "loglevel";
+import core from "@actions/core";
 
 const notion = new Client({ auth: process.env.NOTION_KEY });
 log.setLevel("info");
+
+const mode = core.getInput("mode");
+log.info(JSON.stringify({ mode }));
 
 const {
   DATABASE_ID_BACKLOG: DB_ID_BACKLOG,
@@ -233,6 +237,7 @@ const updateSprintSummary = async () => {
 
   const chartData = await getPointsLeftByDay(sprint, start, end);
   const chartLabels = getChartLabels(start, end);
+  log.info(JSON.stringify({ chartLabels }));
   await generateChart(chartData, chartLabels);
   log.info(
     JSON.stringify({ message: "Generated burndown chart", sprint, chartData })
