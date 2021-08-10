@@ -3,6 +3,7 @@ import moment from "moment";
 import ChartJSImage from "chart.js-image";
 import log from "loglevel";
 import core from "@actions/core";
+import fs from "fs";
 
 const notion = new Client({ auth: process.env.NOTION_KEY });
 log.setLevel("info");
@@ -199,7 +200,11 @@ const generateChart = async (data, labels, filenamePrefix) => {
     .backgroundColor("white")
     .width(500) // 500px
     .height(300); // 300px
-  await chart.toFile(`${filenamePrefix}-burndown.png`);
+  const dir = "./out";
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir);
+  }
+  await chart.toFile(`${dir}/${filenamePrefix}-burndown.png`);
 };
 
 const getChartLabels = (start, end) => {
@@ -238,7 +243,7 @@ const updateSprintSummary = async () => {
   const chartData = await getPointsLeftByDay(sprint, start, end);
   const chartLabels = getChartLabels(start, end);
   log.info(JSON.stringify({ chartLabels }));
-  await generateChart(chartData, chartLabels, `${Date.now()}-${sprint}`);
+  await generateChart(chartData, chartLabels, `${Date.now()}-sprint${sprint}`);
   log.info(
     JSON.stringify({ message: "Generated burndown chart", sprint, chartData })
   );
