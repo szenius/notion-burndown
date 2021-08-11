@@ -1,3 +1,7 @@
+on:
+  workflow_dispatch:
+    inputs:
+
 jobs:
   run_schedule:
     runs-on: ubuntu-latest
