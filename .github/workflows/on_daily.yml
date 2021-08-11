@@ -8,6 +8,8 @@ jobs:
   run_schedule:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v2
       - run: npm i
       - run: npm start
         env:
