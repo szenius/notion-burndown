@@ -1,4 +1,4 @@
-name: Daily (manual)
+name: Manual Trigger
 
 on:
   workflow_dispatch:
@@ -23,8 +23,8 @@ jobs:
           BACKLOG_PROPERTY_STORY_POINTS: ${{ secrets.BACKLOG_PROPERTY_STORY_POINTS }}
       - name: Commit burndown chart
         run: |
-          git config --local user.email "ting.szeying@gmail.com"
-          git config --local user.name "szenius"
+          git config --local user.email ${{ secrets.GH_EMAIL }}
+          git config --local user.name "supplyally-bot"
           git add ./out
           git commit -m "run: upload new burndown chart"
       - name: Push changes
