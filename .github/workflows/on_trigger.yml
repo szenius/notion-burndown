@@ -13,7 +13,7 @@ jobs:
       - run: npm i
       - run: npm start
         env:
-          MODE: daily
+          MODE: manual
           NOTION_KEY: ${{ secrets.NOTION_KEY }}
           DATABASE_ID_BACKLOG: ${{ secrets.DATABASE_ID_BACKLOG }}
           DATABASE_ID_SPRINT_SUMMARY: ${{ secrets.DATABASE_ID_SPRINT_SUMMARY }}
