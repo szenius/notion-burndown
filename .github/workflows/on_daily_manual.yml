@@ -1,7 +1,3 @@
-on:
-  schedule:
-    - cron: "0 0 * * 1-5"
-
 jobs:
   run_schedule:
     runs-on: ubuntu-latest

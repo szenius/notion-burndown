@@ -8,5 +8,5 @@ jobs:
     steps:
       - run: npm i
       - run: npm start
-        with:
+        env:
           mode: sprint_start
