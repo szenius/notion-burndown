@@ -1,3 +1,5 @@
+name: Daily (manual)
+
 on:
   workflow_dispatch:
     inputs:
