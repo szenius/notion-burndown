@@ -242,7 +242,8 @@ const updateSprintSummary = async () => {
   const chartData = await getPointsLeftByDay(sprint, start, end);
   const chartLabels = getChartLabels(start, end);
   log.info(JSON.stringify({ chartLabels }));
-  await generateChart(chartData, chartLabels, `${Date.now()}-sprint${sprint}`);
+  await generateChart(chartData, chartLabels, `sprint${sprint}-${Date.now()}`);
+  await generateChart(chartData, chartLabels, `sprint${sprint}-latest`);
   log.info(
     JSON.stringify({ message: "Generated burndown chart", sprint, chartData })
   );
