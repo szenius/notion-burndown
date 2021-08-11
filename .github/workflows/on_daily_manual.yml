@@ -25,7 +25,7 @@ jobs:
         run: |
           git config --local user.email "ting.szeying@gmail.com"
           git config --local user.name "szenius"
-          git add ./output
+          git add ./out
           git commit -m "run: upload new burndown chart"
       - name: Push changes
         uses: ad-m/github-push-action@master
