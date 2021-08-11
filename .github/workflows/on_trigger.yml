@@ -23,7 +23,7 @@ jobs:
           BACKLOG_PROPERTY_STORY_POINTS: ${{ secrets.BACKLOG_PROPERTY_STORY_POINTS }}
       - name: Commit burndown chart
         run: |
-          git config --local user.email ${{ secrets.GH_EMAIL }}
+          git config --local user.email ${{ secrets.GH_USER_EMAIL }}
           git config --local user.name "supplyally-bot"
           git add ./out
           git commit -m "run: upload new burndown chart"
