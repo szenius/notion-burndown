@@ -13,4 +13,10 @@ jobs:
       - run: npm i
       - run: npm start
         env:
-          mode: daily
+          MODE: daily
+          DATABASE_ID_BACKLOG: ${{ secrets.DATABASE_ID_BACKLOG }}
+          DATABASE_ID_SPRINT_SUMMARY: ${{ secrets.DATABASE_ID_SPRINT_SUMMARY }}
+          DATABASE_ID_DAILY_SUMMARY: ${{ secrets.DATABASE_ID_DAILY_SUMMARY }}
+          BACKLOG_PROPERTY_SPRINT: ${{ secrets.BACKLOG_PROPERTY_SPRINT }}
+          BACKLOG_PROPERTY_EXCLUDE_STATUS_PATTERN: ${{ secrets.BACKLOG_PROPERTY_EXCLUDE_STATUS_PATTERN }}
+          BACKLOG_PROPERTY_STORY_POINTS: ${{ secrets.BACKLOG_PROPERTY_STORY_POINTS }}

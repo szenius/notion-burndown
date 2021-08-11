@@ -2,14 +2,10 @@ import { Client } from "@notionhq/client";
 import moment from "moment";
 import ChartJSImage from "chart.js-image";
 import log from "loglevel";
-import core from "@actions/core";
 import fs from "fs";
 
 const notion = new Client({ auth: process.env.NOTION_KEY });
 log.setLevel("info");
-
-const mode = core.getInput("mode");
-log.info(JSON.stringify({ mode }));
 
 const {
   DATABASE_ID_BACKLOG: DB_ID_BACKLOG,
@@ -18,7 +14,10 @@ const {
   BACKLOG_PROPERTY_SPRINT,
   BACKLOG_PROPERTY_EXCLUDE_STATUS_PATTERN,
   BACKLOG_PROPERTY_STORY_POINTS,
+  MODE,
 } = process.env;
+
+log.info(JSON.stringify({ MODE }));
 
 const getLatestSprintSummary = async () => {
   const response = await notion.databases.query({
