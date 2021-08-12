@@ -2,7 +2,7 @@ name: Daily
 
 on:
   schedule:
-    - cron: "0 0 * * 1-5"
+    - cron: "0 0 * * *" # 8am every day
 
 jobs:
   run_schedule:
