@@ -1,4 +1,4 @@
-name: Daily (manual)
+name: Manual Trigger
 
 on:
   workflow_dispatch:

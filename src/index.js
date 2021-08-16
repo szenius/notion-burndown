@@ -101,7 +101,7 @@ const updateDailySummaryTable = async (sprint, pointsLeft) => {
 };
 
 const getChartDatasets = async (sprint, start, end) => {
-  const numDaysInSprint = moment(end).startOf("day").diff(start, "days");
+  const numDaysInSprint = moment(end).startOf("day").diff(start, "days") + 1;
   // cool way to generate numbers from 1 to n
   const labels = [...Array(numDaysInSprint).keys()].map((i) => i + 1);
 
