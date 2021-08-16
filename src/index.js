@@ -15,7 +15,7 @@ const {
   BACKLOG_PROPERTY_EXCLUDE_STATUS_PATTERN,
   BACKLOG_PROPERTY_STORY_POINTS,
   MODE,
-  INCLUDE_WEEKENDS
+  INCLUDE_WEEKENDS,
 } = process.env;
 
 log.info(JSON.stringify({ MODE }));
@@ -151,9 +151,18 @@ const getChartDatasets = async (sprint, start, end) => {
   const numberOfWeekends =
     Math.floor(numDaysInSprint / 7) * 2 + extraSat + extraSun;
   const numberOfWeekdays = numDaysInSprint - numberOfWeekends;
-  const pointsPerDay = initialPoints / (INCLUDE_WEEKENDS? numDaysInSprint : numberOfWeekdays - 1);
+  const pointsPerDay =
+    initialPoints / (INCLUDE_WEEKENDS ? numDaysInSprint : numberOfWeekdays - 1);
 
-  log.info(JSON.stringify({ initialPoints, numDaysInSprint, numberOfWeekends, numberOfWeekdays, pointsPerDay}));
+  log.info(
+    JSON.stringify({
+      initialPoints,
+      numDaysInSprint,
+      numberOfWeekends,
+      numberOfWeekdays,
+      pointsPerDay,
+    })
+  );
 
   const guideline = [];
   for (const cur = moment(start); cur.isBefore(end); cur.add(1, "days")) {
