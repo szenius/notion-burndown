@@ -208,7 +208,7 @@ const generateChart = async (data, labels, filenamePrefix) => {
 
 const getChartLabels = (start, end) => {
   const chartLabels = [];
-  const numDaysInSprint = moment(end).startOf("day").diff(start, "days");
+  const numDaysInSprint = moment(end).startOf("day").diff(start, "days") + 1;
   for (let i = 1; i <= numDaysInSprint; i += 1) {
     chartLabels.push(i);
   }
