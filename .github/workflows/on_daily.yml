@@ -1,8 +1,9 @@
 name: Daily
 
-on:
-  schedule:
-    - cron: "0 0 * * 1-5"
+# TODO: uncomment for this workflow to be scheduled
+# on:
+#   schedule:
+#     - cron: "0 0 * * 1-5"
 
 jobs:
   run_schedule:
