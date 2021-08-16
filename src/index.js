@@ -14,9 +14,9 @@ const {
   BACKLOG_PROPERTY_SPRINT,
   BACKLOG_PROPERTY_EXCLUDE_STATUS_PATTERN,
   BACKLOG_PROPERTY_STORY_POINTS,
-  MODE,
-  INCLUDE_WEEKENDS,
+  MODE
 } = process.env;
+const INCLUDE_WEEKENDS = process.env["INCLUDE_WEEKENDS"] === "0";
 
 log.info(JSON.stringify({ MODE }));
 
@@ -100,8 +100,16 @@ const updateDailySummaryTable = async (sprint, pointsLeft) => {
   });
 };
 
-const getChartDatasets = async (sprint, start, end) => {
-  const numDaysInSprint = moment(end).startOf("day").diff(start, "days") + 1;
+const getChartDatasets = async (sprint, start, includedEnd) => {
+  // set the end one day later to include the end
+  // note that the new variable end is the excluded day
+  // if the sprint is 1 to 4 June (inclusive), then
+  // start = 1 June, 0000h
+  // includedEnd = 4 June, 0000h
+  // end = 5 June, 0000h --> this includes the entire day of 4 June
+  /** date after the actual end date (excluded) */
+  const end = moment(includedEnd).add(1, "days");
+  const numDaysInSprint = moment(end).diff(start, "days");
   // cool way to generate numbers from 1 to n
   const labels = [...Array(numDaysInSprint).keys()].map((i) => i + 1);
 
@@ -144,12 +152,21 @@ const getChartDatasets = async (sprint, start, end) => {
   }
 
   const initialPoints = pointsLeftByDay[0];
+  /** range from 0 to 6 */
   const startDayOfWeek = start.day();
+  /** range from 0 to 13 but always fulfils startDayOfWeek <= endDayOfWeek < startDayOfWeek + 7 */
   const endDayOfWeek = end.day() >= startDayOfWeek ? end.day() : end.day() + 7;
+  // if startDayOfWeek == endDayOfWeek, then there is no extra "short week"
   const extraSat = startDayOfWeek <= 6 && endDayOfWeek > 6;
-  const extraSun = startDayOfWeek <= 7 && endDayOfWeek > 7;
+  const extraSun =
+    (startDayOfWeek <= 0 && endDayOfWeek > 0) ||
+    (startDayOfWeek <= 7 && endDayOfWeek > 7);
   const numberOfWeekends =
-    Math.floor(numDaysInSprint / 7) * 2 + extraSat + extraSun;
+    // number of complete weeks
+    Math.floor(numDaysInSprint / 7) * 2 +
+    // weekends in the extra "short week"
+    extraSat +
+    extraSun;
   const numberOfWeekdays = numDaysInSprint - numberOfWeekends;
   const pointsPerDay =
     initialPoints / (INCLUDE_WEEKENDS ? numDaysInSprint : numberOfWeekdays - 1);
@@ -165,8 +182,8 @@ const getChartDatasets = async (sprint, start, end) => {
   );
 
   const guideline = [];
-  for (const cur = moment(start); cur.isBefore(end); cur.add(1, "days")) {
-    const index = cur.diff(start, "days");
+  const cur = moment(start);
+  for (let index = 0; index < numDaysInSprint; index++, cur.add(1, "days")) {
     guideline[index] =
       index === 0
         ? initialPoints
