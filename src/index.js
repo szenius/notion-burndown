@@ -15,6 +15,7 @@ const {
   BACKLOG_PROPERTY_EXCLUDE_STATUS_PATTERN,
   BACKLOG_PROPERTY_STORY_POINTS,
   MODE,
+  INCLUDE_WEEKENDS
 } = process.env;
 
 log.info(JSON.stringify({ MODE }));
@@ -150,7 +151,7 @@ const getChartDatasets = async (sprint, start, end) => {
   const numberOfWeekends =
     Math.floor(numDaysInSprint / 7) * 2 + extraSat + extraSun;
   const numberOfWeekdays = numDaysInSprint - numberOfWeekends;
-  const pointsPerDay = initialPoints / (numberOfWeekdays - 1);
+  const pointsPerDay = initialPoints / (INCLUDE_WEEKENDS? numDaysInSprint : numberOfWeekdays - 1);
 
   log.info(JSON.stringify({ initialPoints, numDaysInSprint, numberOfWeekends, numberOfWeekdays, pointsPerDay}));
 
@@ -161,7 +162,7 @@ const getChartDatasets = async (sprint, start, end) => {
       index === 0
         ? initialPoints
         : guideline[index - 1] -
-          (cur.day() < 2 ? 0 : pointsPerDay);
+          (!INCLUDE_WEEKENDS && cur.day() < 2 ? 0 : pointsPerDay);
     // deduct based on the previous day
     // if cur.day() is 0 or 1 means the previous day was 6 (sat) or 0 (sun)
   }
