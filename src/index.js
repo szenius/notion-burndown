@@ -99,7 +99,11 @@ const updateDailySummaryTable = async (sprint, pointsLeft) => {
   });
 };
 
-const getPointsLeftByDay = async (sprint, start) => {
+const getChartDatasets = async (sprint, start, end) => {
+  const numDaysInSprint = moment(end).startOf("day").diff(start, "days");
+  // cool way to generate numbers from 1 to n
+  const labels = [...Array(numDaysInSprint).keys()].map((i) => i + 1);
+
   const response = await notion.databases.query({
     database_id: DB_ID_DAILY_SUMMARY,
     filter: {
@@ -137,14 +141,35 @@ const getPointsLeftByDay = async (sprint, start) => {
       pointsLeftByDay[i] = 0;
     }
   }
-  return pointsLeftByDay;
+
+  const initialPoints = pointsLeftByDay[0];
+  const startDayOfWeek = start.day();
+  const endDayOfWeek = end.day() >= startDayOfWeek ? end.day() : end.day() + 7;
+  const extraSat = startDayOfWeek <= 6 && endDayOfWeek > 6;
+  const extraSun = startDayOfWeek <= 7 && endDayOfWeek > 7;
+  const numberOfWeekends =
+    Math.floor(numDaysInSprint / 7) * 2 + extraSat + extraSun;
+  const numberOfWeekdays = numDaysInSprint - numberOfWeekends;
+  const pointsPerDay = initialPoints / (numberOfWeekdays - 1);
+
+  log.info(JSON.stringify({ initialPoints, numDaysInSprint, numberOfWeekends, numberOfWeekdays, pointsPerDay}));
+
+  const guideline = [];
+  for (const cur = moment(start); cur.isBefore(end); cur.add(1, "days")) {
+    const index = cur.diff(start, "days");
+    guideline[index] =
+      index === 0
+        ? initialPoints
+        : guideline[index - 1] -
+          (cur.day() < 2 ? 0 : pointsPerDay);
+    // deduct based on the previous day
+    // if cur.day() is 0 or 1 means the previous day was 6 (sat) or 0 (sun)
+  }
+
+  return { labels, pointsLeftByDay, guideline };
 };
 
-const generateChart = async (data, labels, filenamePrefix) => {
-  const pointsPerDay = data[0] / (labels[labels.length - 1] - 1);
-  const constantLine = labels.map(
-    (label) => data[0] - pointsPerDay * (label - 1)
-  );
+const generateChart = (data, guideline, labels) => {
   const chart = ChartJSImage()
     .chart({
       type: "line",
@@ -161,7 +186,7 @@ const generateChart = async (data, labels, filenamePrefix) => {
             label: "Constant",
             borderColor: "#cad0d6",
             backgroundColor: "rgba(54,+162,+235,+.5)",
-            data: constantLine,
+            data: guideline,
           },
         ],
       },
@@ -199,20 +224,14 @@ const generateChart = async (data, labels, filenamePrefix) => {
     .backgroundColor("white")
     .width(500) // 500px
     .height(300); // 300px
-  const dir = "./out";
+  return chart;
+};
+
+const writeChartToFile = async (chart, dir, filenamePrefix) => {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir);
   }
   await chart.toFile(`${dir}/${filenamePrefix}-burndown.png`);
-};
-
-const getChartLabels = (start, end) => {
-  const chartLabels = [];
-  const numDaysInSprint = moment(end).startOf("day").diff(start, "days");
-  for (let i = 1; i <= numDaysInSprint; i += 1) {
-    chartLabels.push(i);
-  }
-  return chartLabels;
 };
 
 const updateSprintSummary = async () => {
@@ -239,13 +258,17 @@ const updateSprintSummary = async () => {
     })
   );
 
-  const chartData = await getPointsLeftByDay(sprint, start, end);
-  const chartLabels = getChartLabels(start, end);
-  log.info(JSON.stringify({ chartLabels }));
-  await generateChart(chartData, chartLabels, `sprint${sprint}-${Date.now()}`);
-  await generateChart(chartData, chartLabels, `sprint${sprint}-latest`);
+  const {
+    labels,
+    pointsLeftByDay: data,
+    guideline,
+  } = await getChartDatasets(sprint, start, end);
+  log.info(JSON.stringify({ labels, data, guideline }));
+  const chart = generateChart(data, guideline, labels);
+  await writeChartToFile(chart, "./out", `sprint${sprint}-${Date.now()}`);
+  await writeChartToFile(chart, "./out", `sprint${sprint}-latest`);
   log.info(
-    JSON.stringify({ message: "Generated burndown chart", sprint, chartData })
+    JSON.stringify({ message: "Generated burndown chart", sprint, data })
   );
 };
 
