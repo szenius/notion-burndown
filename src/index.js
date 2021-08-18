@@ -168,9 +168,18 @@ const getChartDatasets = async (sprint, start, includedEnd) => {
     extraSat +
     extraSun;
   const numberOfWeekdays = numDaysInSprint - numberOfWeekends;
-  const pointsPerDay = initialPoints / (INCLUDE_WEEKENDS? numDaysInSprint : numberOfWeekdays - 1);
+  const pointsPerDay =
+    initialPoints / (INCLUDE_WEEKENDS ? numDaysInSprint : numberOfWeekdays - 1);
 
-  log.info(JSON.stringify({ initialPoints, numDaysInSprint, numberOfWeekends, numberOfWeekdays, pointsPerDay}));
+  log.info(
+    JSON.stringify({
+      initialPoints,
+      numDaysInSprint,
+      numberOfWeekends,
+      numberOfWeekdays,
+      pointsPerDay,
+    })
+  );
 
   const guideline = [];
   const cur = moment(start);
