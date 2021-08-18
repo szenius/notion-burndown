@@ -16,7 +16,7 @@ const {
   BACKLOG_PROPERTY_STORY_POINTS,
   MODE
 } = process.env;
-const INCLUDE_WEEKENDS = process.env["INCLUDE_WEEKENDS"] === "0";
+const INCLUDE_WEEKENDS = (process.env["INCLUDE_WEEKENDS"] ?? "true") === "true";
 
 log.info(JSON.stringify({ MODE }));
 
