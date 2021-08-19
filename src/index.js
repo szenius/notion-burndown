@@ -149,8 +149,7 @@ const getPointsLeftByDay = async (sprint, start) => {
     }
     pointsLeftByDay[day] = Points.number;
   });
-  const today = moment().startOf("day");
-  const numDaysSinceSprintStart = today.diff(start, "days");
+  const numDaysSinceSprintStart = moment().startOf("day").diff(start, "days");
   for (let i = 0; i < numDaysSinceSprintStart; i += 1) {
     if (!pointsLeftByDay[i]) {
       pointsLeftByDay[i] = 0;
@@ -216,7 +215,7 @@ const getGuideline = (start, end, initialPoints, numberOfWeekdays) => {
 
 const getChartLabels = (numberOfDays) => {
   // cool way to generate numbers from 1 to n
-  return [...Array(numberOfDays+1).keys()].map((i) => i + 1);
+  return [...Array(numberOfDays + 1).keys()].map((i) => i + 1);
 };
 
 const getChartDatasets = async (sprint, start, end) => {
