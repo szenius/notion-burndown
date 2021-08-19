@@ -100,19 +100,24 @@ const updateDailySummaryTable = async (sprint, pointsLeft) => {
   });
 };
 
-const getChartDatasets = async (sprint, start, includedEnd) => {
-  // set the end one day later to include the end
-  // note that the new variable end is the excluded day
-  // if the sprint is 1 to 4 June (inclusive), then
-  // start = 1 June, 0000h
-  // includedEnd = 4 June, 0000h
-  // end = 5 June, 0000h --> this includes the entire day of 4 June
-  /** date after the actual end date (excluded) */
-  const end = moment(includedEnd).add(1, "days");
-  const numDaysInSprint = moment(end).diff(start, "days");
-  // cool way to generate numbers from 1 to n
-  const labels = [...Array(numDaysInSprint).keys()].map((i) => i + 1);
+const isWeekend = date => {
+  const dayOfWeek = moment(date).format("ddd");
+  return dayOfWeek === "Sat" || dayOfWeek === "Sun";
+}
 
+/** returns the number of weekdays between start (inclusive) and end (exclusive) */
+const getNumberOfWeekdays = (start, end) => {
+  let weekdays = 0
+  for (const cur = moment(start); cur.isBefore(end); cur.add(1, "days")) {
+    if (!isWeekend(cur)) {
+      weekdays++;
+    }
+  }
+  return weekdays;
+}
+
+/** Returns the points left from the start of sprint (inclusive) to the current day (inclusive) */
+const getPointsLeftByDay = async (sprint, start) => {
   const response = await notion.databases.query({
     database_id: DB_ID_DAILY_SUMMARY,
     filter: {
@@ -144,38 +149,38 @@ const getChartDatasets = async (sprint, start, includedEnd) => {
     }
     pointsLeftByDay[day] = Points.number;
   });
-  const numDaysSinceSprintStart = moment().startOf("day").diff(start, "days");
+  const today = moment().startOf("day");
+  const numDaysSinceSprintStart = today.diff(start, "days");
   for (let i = 0; i < numDaysSinceSprintStart; i += 1) {
     if (!pointsLeftByDay[i]) {
       pointsLeftByDay[i] = 0;
     }
   }
+  log.info(JSON.stringify({ numDaysSinceSprintStart }));
 
-  const initialPoints = pointsLeftByDay[0];
-  /** range from 0 to 6 */
-  const startDayOfWeek = start.day();
-  /** range from 0 to 13 but always fulfils startDayOfWeek <= endDayOfWeek < startDayOfWeek + 7 */
-  const endDayOfWeek = end.day() >= startDayOfWeek ? end.day() : end.day() + 7;
-  // if startDayOfWeek == endDayOfWeek, then there is no extra "short week"
-  const extraSat = startDayOfWeek <= 6 && endDayOfWeek > 6;
-  const extraSun =
-    (startDayOfWeek <= 0 && endDayOfWeek > 0) ||
-    (startDayOfWeek <= 7 && endDayOfWeek > 7);
-  const numberOfWeekends =
-    // number of complete weeks
-    Math.floor(numDaysInSprint / 7) * 2 +
-    // weekends in the extra "short week"
-    extraSat +
-    extraSun;
-  const numberOfWeekdays = numDaysInSprint - numberOfWeekends;
+  if (!INCLUDE_WEEKENDS) {
+    // remove weekend entries
+    let index = 0;
+    for (const cur = moment(start); index < pointsLeftByDay.length; cur.add(1, "days")) {
+      if (isWeekend(cur)) {
+        pointsLeftByDay.splice(index, 1);
+      } else {
+        index++;
+      }
+    }
+  }
+
+  return pointsLeftByDay;
+}
+
+const getGuideline = (start, end, initialPoints, numberOfWeekdays) => {
   const pointsPerDay =
-    initialPoints / (INCLUDE_WEEKENDS ? numDaysInSprint : numberOfWeekdays - 1);
+    initialPoints / numberOfWeekdays;
 
   log.info(
     JSON.stringify({
       initialPoints,
       numDaysInSprint,
-      numberOfWeekends,
       numberOfWeekdays,
       pointsPerDay,
     })
@@ -183,15 +188,45 @@ const getChartDatasets = async (sprint, start, includedEnd) => {
 
   const guideline = [];
   const cur = moment(start);
-  for (let index = 0; index < numDaysInSprint; index++, cur.add(1, "days")) {
-    guideline[index] =
-      index === 0
-        ? initialPoints
-        : guideline[index - 1] -
-          (!INCLUDE_WEEKENDS && cur.day() < 2 ? 0 : pointsPerDay);
-    // deduct based on the previous day
-    // if cur.day() is 0 or 1 means the previous day was 6 (sat) or 0 (sun)
+  let prevDayIsWeekday = false;
+  for (let index = 0; cur.isBefore(end); index++, cur.add(1, "days")) {
+    if (!INCLUDE_WEEKENDS) {
+      while (isWeekend(cur)) {
+        cur.add(1, "days");
+      }
+    }
+
+    if (index === 0) {
+      guideline[index] = initialPoints;
+    } else {
+      guideline[index] = guideline[index - 1] - (prevDayIsWeekday ? pointsPerDay : 0);
+    }
+
+    prevDayIsWeekday = !isWeekend(cur);
   }
+
+  return guideline;
+}
+
+const getChartDatasets = async (sprint, start, includedEnd) => {
+  // set the end one day later to include the end
+  // note that the new variable end is the excluded day
+  // if the sprint is 1 to 4 June (inclusive), then
+  // start = 1 June, 0000h
+  // includedEnd = 4 June, 0000h
+  // end = 5 June, 0000h --> this includes the entire day of 4 June
+  /** date after the actual end date (excluded) */
+  const end = moment(includedEnd).add(1, "days");
+  const numDaysInSprint = moment(end).diff(start, "days");
+
+  pointsLeftByDay = await getPointsLeftByDay(sprint, start);
+
+  const numberOfWeekdays = getNumberOfWeekdays(start, end);
+
+  const guideline = getGuideline(start, end, pointsLeftByDay[0], numberOfWeekdays);
+
+  // cool way to generate numbers from 1 to n
+  const labels = [...Array(INCLUDE_WEEKENDS ? numDaysInSprint : numberOfWeekdays).keys()].map((i) => i + 1);
 
   return { labels, pointsLeftByDay, guideline };
 };
