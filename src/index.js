@@ -207,7 +207,7 @@ const getIdealBurndown = (start, end, initialPoints, numberOfWeekdays) => {
   const idealBurndown = [];
   const cur = moment(start);
   const afterEnd = moment(end).add(1, "days"); // to include the end day data point
-  let prevDayIsWeekday = false;
+  let isPrevDayWeekday = false;
   for (let index = 0; cur.isBefore(afterEnd); index++, cur.add(1, "days")) {
     // if not including the weekends, just skip over the weekend days
     if (!INCLUDE_WEEKENDS) {
@@ -220,10 +220,10 @@ const getIdealBurndown = (start, end, initialPoints, numberOfWeekdays) => {
       idealBurndown[index] = initialPoints;
     } else {
       idealBurndown[index] =
-        idealBurndown[index - 1] - (prevDayIsWeekday ? pointsPerDay : 0);
+        idealBurndown[index - 1] - (isPrevDayWeekday ? pointsPerDay : 0);
     }
 
-    prevDayIsWeekday = !isWeekend(cur);
+    isPrevDayWeekday = !isWeekend(cur);
   }
 
   return idealBurndown;
