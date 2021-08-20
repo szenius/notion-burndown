@@ -116,7 +116,12 @@ const getNumberOfWeekdays = (start, end) => {
   return weekdays;
 };
 
-/** Returns the points left from the start of sprint (inclusive) to the current day (inclusive) */
+/** 
+ * Calculates the points left for each day of the sprint so far
+ * @param {number} sprint Sprint number of current sprint
+ * @param {moment.Moment} start First day of sprint (inclusive)
+ * @returns {number[]} Array of points left each day from {@link start} till today (inclusive)
+ * */
 const getPointsLeftByDay = async (sprint, start) => {
   const response = await notion.databases.query({
     database_id: DB_ID_DAILY_SUMMARY,
@@ -175,8 +180,19 @@ const getPointsLeftByDay = async (sprint, start) => {
 
   return pointsLeftByDay;
 };
-
-/** generate the guideline. A flat line is shown across weekends if {@link INCLUDE_WEEKENDS} is set to true */
+/**
+ * Generates the ideal burndown line for the sprint. Work is assumed to be done on
+ * each weekday from {@link start} until the day before {@link end}. A data point is
+ * generated for {@link end} to show the final remaining points.
+ * 
+ * A flat line is shown across weekends if {@link INCLUDE_WEEKENDS} is set to true,
+ * else, the weekends are not shown.
+ * @param {moment.Moment} start The start of the sprint (inclusive)
+ * @param {moment.Moment} end The end of the sprint (inclusive)
+ * @param {number} initialPoints Points the sprint started with
+ * @param {number} numberOfWeekdays Number of working days in the sprint
+ * @returns {number[]} Array of the ideal points left per day
+ */
 const getGuideline = (start, end, initialPoints, numberOfWeekdays) => {
   const pointsPerDay = initialPoints / numberOfWeekdays;
 
@@ -213,11 +229,25 @@ const getGuideline = (start, end, initialPoints, numberOfWeekdays) => {
   return guideline;
 };
 
+/**
+ * Generates the labels for the chart from 1 to {@link numberOfDays} + 1
+ * to have a data point for after the last day.
+ * @param {number} numberOfDays Number of workdays in the sprint
+ * @returns {number[]} Labels for the chart
+ */
 const getChartLabels = (numberOfDays) => {
   // cool way to generate numbers from 1 to n
   return [...Array(numberOfDays + 1).keys()].map((i) => i + 1);
 };
 
+/**
+ * Generates the data to be displayed on the chart. Work is assumed to be
+ * done on each day from the start until the day before {@link end}.
+ * @param {number} sprint Current sprint number
+ * @param {moment.Moment} start Start date of sprint (included)
+ * @param {moment.Moment} end End date of sprint (excluded)
+ * @returns The chart labels, data line, and ideal burndown line
+ */
 const getChartDatasets = async (sprint, start, end) => {
   const numDaysInSprint = moment(end).diff(start, "days");
   const numberOfWeekdays = getNumberOfWeekdays(start, end);
