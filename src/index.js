@@ -105,7 +105,12 @@ const isWeekend = (date) => {
   return dayOfWeek === "Sat" || dayOfWeek === "Sun";
 };
 
-/** returns the number of weekdays between start (inclusive) and end (exclusive) */
+/**
+ * Calculates the number of weekdays from {@link start} to {@link end}
+ * @param {moment.Moment} start First day of sprint (inclusive)
+ * @param {moment.Moment} end Last day of sprint (exclusive)
+ * @returns number of weekdays between both dates
+ */
 const getNumberOfWeekdays = (start, end) => {
   let weekdays = 0;
   for (const cur = moment(start); cur.isBefore(end); cur.add(1, "days")) {
