@@ -250,17 +250,17 @@ const getChartLabels = (numberOfDays) => {
  */
 const getChartDatasets = async (sprint, start, end) => {
   const numDaysInSprint = moment(end).diff(start, "days");
-  const numberOfWeekdays = getNumberOfWeekdays(start, end);
+  const numWeekdays = getNumberOfWeekdays(start, end);
 
   const pointsLeftByDay = await getPointsLeftByDay(sprint, start);
   const idealBurndown = getIdealBurndown(
     start,
     end,
     pointsLeftByDay[0],
-    numberOfWeekdays
+    numWeekdays
   );
   const labels = getChartLabels(
-    INCLUDE_WEEKENDS ? numDaysInSprint : numberOfWeekdays
+    INCLUDE_WEEKENDS ? numDaysInSprint : numWeekdays
   );
 
   return { labels, pointsLeftByDay, idealBurndown };
