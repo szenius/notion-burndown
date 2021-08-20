@@ -15,8 +15,9 @@ const {
   BACKLOG_PROPERTY_EXCLUDE_STATUS_PATTERN,
   BACKLOG_PROPERTY_STORY_POINTS,
   MODE,
+  INCLUDE_WEEKENDS = "true"
 } = process.env;
-const INCLUDE_WEEKENDS = (process.env["INCLUDE_WEEKENDS"] ?? "true") === "true";
+const isWeekendsIncluded = INCLUDE_WEEKENDS === "true";
 
 log.info(JSON.stringify({ MODE }));
 
@@ -167,7 +168,7 @@ const getPointsLeftByDay = async (sprint, start) => {
   }
   log.info(JSON.stringify({ numDaysSinceSprintStart }));
 
-  if (!INCLUDE_WEEKENDS) {
+  if (!isWeekendsIncluded) {
     // remove weekend entries
     let index = 0;
     for (
@@ -190,7 +191,7 @@ const getPointsLeftByDay = async (sprint, start) => {
  * each weekday from {@link start} until the day before {@link end}. A data point is
  * generated for {@link end} to show the final remaining points.
  * 
- * A flat line is shown across weekends if {@link INCLUDE_WEEKENDS} is set to true,
+ * A flat line is shown across weekends if {@link isWeekendsIncluded} is set to true,
  * else, the weekends are not shown.
  * @param {moment.Moment} start The start of the sprint (inclusive)
  * @param {moment.Moment} end The end of the sprint (inclusive)
@@ -215,7 +216,7 @@ const getIdealBurndown = (start, end, initialPoints, numberOfWeekdays) => {
   let isPrevDayWeekday = false;
   for (let index = 0; cur.isBefore(afterEnd); index++, cur.add(1, "days")) {
     // if not including the weekends, just skip over the weekend days
-    if (!INCLUDE_WEEKENDS) {
+    if (!isWeekendsIncluded) {
       while (isWeekend(cur)) {
         cur.add(1, "days");
       }
@@ -265,7 +266,7 @@ const getChartDatasets = async (sprint, start, end) => {
     numWeekdays
   );
   const labels = getChartLabels(
-    INCLUDE_WEEKENDS ? numDaysInSprint : numWeekdays
+    isWeekendsIncluded ? numDaysInSprint : numWeekdays
   );
 
   return { labels, pointsLeftByDay, idealBurndown };
