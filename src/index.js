@@ -193,7 +193,7 @@ const getPointsLeftByDay = async (sprint, start) => {
  * @param {number} numberOfWeekdays Number of working days in the sprint
  * @returns {number[]} Array of the ideal points left per day
  */
-const getGuideline = (start, end, initialPoints, numberOfWeekdays) => {
+const getIdealBurndown = (start, end, initialPoints, numberOfWeekdays) => {
   const pointsPerDay = initialPoints / numberOfWeekdays;
 
   log.info(
@@ -204,7 +204,7 @@ const getGuideline = (start, end, initialPoints, numberOfWeekdays) => {
     })
   );
 
-  const guideline = [];
+  const idealBurndown = [];
   const cur = moment(start);
   const afterEnd = moment(end).add(1, "days"); // to include the end day data point
   let prevDayIsWeekday = false;
@@ -217,16 +217,16 @@ const getGuideline = (start, end, initialPoints, numberOfWeekdays) => {
     }
 
     if (index === 0) {
-      guideline[index] = initialPoints;
+      idealBurndown[index] = initialPoints;
     } else {
-      guideline[index] =
-        guideline[index - 1] - (prevDayIsWeekday ? pointsPerDay : 0);
+      idealBurndown[index] =
+        idealBurndown[index - 1] - (prevDayIsWeekday ? pointsPerDay : 0);
     }
 
     prevDayIsWeekday = !isWeekend(cur);
   }
 
-  return guideline;
+  return idealBurndown;
 };
 
 /**
@@ -253,7 +253,7 @@ const getChartDatasets = async (sprint, start, end) => {
   const numberOfWeekdays = getNumberOfWeekdays(start, end);
 
   const pointsLeftByDay = await getPointsLeftByDay(sprint, start);
-  const guideline = getGuideline(
+  const idealBurndown = getIdealBurndown(
     start,
     end,
     pointsLeftByDay[0],
@@ -263,10 +263,10 @@ const getChartDatasets = async (sprint, start, end) => {
     INCLUDE_WEEKENDS ? numDaysInSprint : numberOfWeekdays
   );
 
-  return { labels, pointsLeftByDay, guideline };
+  return { labels, pointsLeftByDay, idealBurndown };
 };
 
-const generateChart = (data, guideline, labels) => {
+const generateChart = (data, idealBurndown, labels) => {
   const chart = ChartJSImage()
     .chart({
       type: "line",
@@ -283,7 +283,7 @@ const generateChart = (data, guideline, labels) => {
             label: "Constant",
             borderColor: "#cad0d6",
             backgroundColor: "rgba(54,+162,+235,+.5)",
-            data: guideline,
+            data: idealBurndown,
           },
         ],
       },
@@ -358,10 +358,10 @@ const updateSprintSummary = async () => {
   const {
     labels,
     pointsLeftByDay: data,
-    guideline,
+    idealBurndown,
   } = await getChartDatasets(sprint, start, end);
-  log.info(JSON.stringify({ labels, data, guideline }));
-  const chart = generateChart(data, guideline, labels);
+  log.info(JSON.stringify({ labels, data, idealBurndown }));
+  const chart = generateChart(data, idealBurndown, labels);
   await writeChartToFile(chart, "./out", `sprint${sprint}-${Date.now()}`);
   await writeChartToFile(chart, "./out", `sprint${sprint}-latest`);
   log.info(
