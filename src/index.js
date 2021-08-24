@@ -109,12 +109,12 @@ const isWeekend = (date) => {
 /**
  * Calculates the number of weekdays from {@link start} to {@link end}
  * @param {moment.Moment} start First day of sprint (inclusive)
- * @param {moment.Moment} end Last day of sprint (exclusive)
+ * @param {moment.Moment} end Last day of sprint (inclusive)
  * @returns number of weekdays between both dates
  */
 const getNumberOfWeekdays = (start, end) => {
   let weekdays = 0;
-  for (const cur = moment(start); cur.isBefore(end); cur.add(1, "days")) {
+  for (const cur = moment(start); !cur.isAfter(end); cur.add(1, "days")) {
     if (!isWeekend(cur)) {
       weekdays++;
     }
@@ -243,7 +243,7 @@ const getIdealBurndown = (start, end, initialPoints, numberOfWeekdays) => {
  */
 const getChartLabels = (numberOfDays) => {
   // cool way to generate numbers from 1 to n
-  return [...Array(numberOfDays + 1).keys()].map((i) => i + 1);
+  return [...Array(numberOfDays).keys()].map((i) => i + 1);
 };
 
 /**
@@ -255,8 +255,9 @@ const getChartLabels = (numberOfDays) => {
  * @returns The chart labels, data line, and ideal burndown line
  */
 const getChartDatasets = async (sprint, start, end) => {
-  const numDaysInSprint = moment(end).diff(start, "days");
-  const numWeekdays = getNumberOfWeekdays(start, end);
+  const numDaysInSprint = moment(end).diff(start, "days") + 1;
+  const lastFullDay = moment(end).add(-1, "days");
+  const numWeekdays = getNumberOfWeekdays(start, lastFullDay);
 
   const pointsLeftByDay = await getPointsLeftByDay(sprint, start);
   const idealBurndown = getIdealBurndown(
@@ -266,7 +267,7 @@ const getChartDatasets = async (sprint, start, end) => {
     numWeekdays
   );
   const labels = getChartLabels(
-    isWeekendsIncluded ? numDaysInSprint : numWeekdays
+    isWeekendsIncluded ? numDaysInSprint : (numWeekdays+1)
   );
 
   return { labels, pointsLeftByDay, idealBurndown };
