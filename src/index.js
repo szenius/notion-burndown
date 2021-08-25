@@ -15,7 +15,7 @@ const {
   BACKLOG_PROPERTY_EXCLUDE_STATUS_PATTERN,
   BACKLOG_PROPERTY_STORY_POINTS,
   MODE,
-  INCLUDE_WEEKENDS = "true"
+  INCLUDE_WEEKENDS = "true",
 } = process.env;
 const isWeekendsIncluded = INCLUDE_WEEKENDS === "true";
 
@@ -122,7 +122,7 @@ const getNumberOfWeekdays = (start, end) => {
   return weekdays;
 };
 
-/** 
+/**
  * Calculates the points left for each day of the sprint so far
  * @param {number} sprint Sprint number of current sprint
  * @param {moment.Moment} start First day of sprint (inclusive)
@@ -190,7 +190,7 @@ const getPointsLeftByDay = async (sprint, start) => {
  * Generates the ideal burndown line for the sprint. Work is assumed to be done on
  * each weekday from {@link start} until the day before {@link end}. A data point is
  * generated for {@link end} to show the final remaining points.
- * 
+ *
  * A flat line is shown across weekends if {@link isWeekendsIncluded} is set to true,
  * else, the weekends are not shown.
  * @param {moment.Moment} start The start of the sprint (inclusive)
@@ -267,7 +267,7 @@ const getChartDatasets = async (sprint, start, end) => {
     numWeekdays
   );
   const labels = getChartLabels(
-    isWeekendsIncluded ? numDaysInSprint : (numWeekdays+1)
+    isWeekendsIncluded ? numDaysInSprint : numWeekdays + 1
   );
 
   return { labels, pointsLeftByDay, idealBurndown };
