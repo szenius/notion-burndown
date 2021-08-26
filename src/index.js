@@ -15,7 +15,9 @@ const {
   BACKLOG_PROPERTY_EXCLUDE_STATUS_PATTERN,
   BACKLOG_PROPERTY_STORY_POINTS,
   MODE,
+  INCLUDE_WEEKENDS = "true",
 } = process.env;
+const isWeekendsIncluded = INCLUDE_WEEKENDS === "true";
 
 log.info(JSON.stringify({ MODE }));
 
@@ -99,6 +101,33 @@ const updateDailySummaryTable = async (sprint, pointsLeft) => {
   });
 };
 
+const isWeekend = (date) => {
+  const dayOfWeek = moment(date).format("ddd");
+  return dayOfWeek === "Sat" || dayOfWeek === "Sun";
+};
+
+/**
+ * Calculates the number of weekdays from {@link start} to {@link end}
+ * @param {moment.Moment} start First day of sprint (inclusive)
+ * @param {moment.Moment} end Last day of sprint (inclusive)
+ * @returns number of weekdays between both dates
+ */
+const getNumberOfWeekdays = (start, end) => {
+  let weekdays = 0;
+  for (const cur = moment(start); !cur.isAfter(end); cur.add(1, "days")) {
+    if (!isWeekend(cur)) {
+      weekdays++;
+    }
+  }
+  return weekdays;
+};
+
+/**
+ * Calculates the points left for each day of the sprint so far
+ * @param {number} sprint Sprint number of current sprint
+ * @param {moment.Moment} start First day of sprint (inclusive)
+ * @returns {number[]} Array of points left each day from {@link start} till today (inclusive)
+ * */
 const getPointsLeftByDay = async (sprint, start) => {
   const response = await notion.databases.query({
     database_id: DB_ID_DAILY_SUMMARY,
@@ -137,14 +166,114 @@ const getPointsLeftByDay = async (sprint, start) => {
       pointsLeftByDay[i] = 0;
     }
   }
+  log.info(JSON.stringify({ numDaysSinceSprintStart }));
+
+  if (!isWeekendsIncluded) {
+    // remove weekend entries
+    let index = 0;
+    for (
+      const cur = moment(start);
+      index < pointsLeftByDay.length;
+      cur.add(1, "days")
+    ) {
+      if (isWeekend(cur)) {
+        pointsLeftByDay.splice(index, 1);
+      } else {
+        index++;
+      }
+    }
+  }
+
   return pointsLeftByDay;
 };
+/**
+ * Generates the ideal burndown line for the sprint. Work is assumed to be done on
+ * each weekday from {@link start} until the day before {@link end}. A data point is
+ * generated for {@link end} to show the final remaining points.
+ *
+ * A flat line is shown across weekends if {@link isWeekendsIncluded} is set to true,
+ * else, the weekends are not shown.
+ * @param {moment.Moment} start The start of the sprint (inclusive)
+ * @param {moment.Moment} end The end of the sprint (inclusive)
+ * @param {number} initialPoints Points the sprint started with
+ * @param {number} numberOfWeekdays Number of working days in the sprint
+ * @returns {number[]} Array of the ideal points left per day
+ */
+const getIdealBurndown = (start, end, initialPoints, numberOfWeekdays) => {
+  const pointsPerDay = initialPoints / numberOfWeekdays;
 
-const generateChart = async (data, labels, filenamePrefix) => {
-  const pointsPerDay = data[0] / (labels[labels.length - 1] - 1);
-  const constantLine = labels.map(
-    (label) => data[0] - pointsPerDay * (label - 1)
+  log.info(
+    JSON.stringify({
+      initialPoints,
+      numberOfWeekdays,
+      pointsPerDay,
+    })
   );
+
+  const idealBurndown = [];
+  const cur = moment(start);
+  const afterEnd = moment(end).add(1, "days"); // to include the end day data point
+  let isPrevDayWeekday = false;
+  for (let index = 0; cur.isBefore(afterEnd); index++, cur.add(1, "days")) {
+    // if not including the weekends, just skip over the weekend days
+    if (!isWeekendsIncluded) {
+      while (isWeekend(cur)) {
+        cur.add(1, "days");
+      }
+    }
+
+    if (index === 0) {
+      idealBurndown[index] = initialPoints;
+    } else {
+      idealBurndown[index] =
+        idealBurndown[index - 1] - (isPrevDayWeekday ? pointsPerDay : 0);
+    }
+
+    isPrevDayWeekday = !isWeekend(cur);
+  }
+
+  return idealBurndown;
+};
+
+/**
+ * Generates the labels for the chart from 1 to {@link numberOfDays} + 1
+ * to have a data point for after the last day.
+ * @param {number} numberOfDays Number of workdays in the sprint
+ * @returns {number[]} Labels for the chart
+ */
+const getChartLabels = (numberOfDays) => {
+  // cool way to generate numbers from 1 to n
+  return [...Array(numberOfDays).keys()].map((i) => i + 1);
+};
+
+/**
+ * Generates the data to be displayed on the chart. Work is assumed to be
+ * done on each day from the start until the day before {@link end}.
+ * @param {number} sprint Current sprint number
+ * @param {moment.Moment} start Start date of sprint (included)
+ * @param {moment.Moment} end End date of sprint (excluded)
+ * @returns The chart labels, data line, and ideal burndown line
+ */
+const getChartDatasets = async (sprint, start, end) => {
+  const numDaysInSprint = moment(end).diff(start, "days") + 1;
+  const lastFullDay = moment(end).add(-1, "days");
+  const numWeekdays = getNumberOfWeekdays(start, lastFullDay);
+
+  const pointsLeftByDay = await getPointsLeftByDay(sprint, start);
+  const idealBurndown = getIdealBurndown(
+    start,
+    end,
+    pointsLeftByDay[0],
+    numWeekdays
+  );
+  const labels = getChartLabels(
+    isWeekendsIncluded ? numDaysInSprint : numWeekdays + 1
+  );
+
+  return { labels, pointsLeftByDay, idealBurndown };
+};
+
+const generateChart = (data, idealBurndown, labels) => {
   const chart = ChartJSImage()
     .chart({
       type: "line",
@@ -161,7 +290,7 @@ const generateChart = async (data, labels, filenamePrefix) => {
             label: "Constant",
             borderColor: "#cad0d6",
             backgroundColor: "rgba(54,+162,+235,+.5)",
-            data: constantLine,
+            data: idealBurndown,
           },
         ],
       },
@@ -199,20 +328,14 @@ const generateChart = async (data, labels, filenamePrefix) => {
     .backgroundColor("white")
     .width(500) // 500px
     .height(300); // 300px
-  const dir = "./out";
+  return chart;
+};
+
+const writeChartToFile = async (chart, dir, filenamePrefix) => {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir);
   }
   await chart.toFile(`${dir}/${filenamePrefix}-burndown.png`);
-};
-
-const getChartLabels = (start, end) => {
-  const chartLabels = [];
-  const numDaysInSprint = moment(end).startOf("day").diff(start, "days") + 1;
-  for (let i = 1; i <= numDaysInSprint; i += 1) {
-    chartLabels.push(i);
-  }
-  return chartLabels;
 };
 
 const updateSprintSummary = async () => {
@@ -239,13 +362,17 @@ const updateSprintSummary = async () => {
     })
   );
 
-  const chartData = await getPointsLeftByDay(sprint, start, end);
-  const chartLabels = getChartLabels(start, end);
-  log.info(JSON.stringify({ chartLabels }));
-  await generateChart(chartData, chartLabels, `sprint${sprint}-${Date.now()}`);
-  await generateChart(chartData, chartLabels, `sprint${sprint}-latest`);
+  const {
+    labels,
+    pointsLeftByDay: data,
+    idealBurndown,
+  } = await getChartDatasets(sprint, start, end);
+  log.info(JSON.stringify({ labels, data, idealBurndown }));
+  const chart = generateChart(data, idealBurndown, labels);
+  await writeChartToFile(chart, "./out", `sprint${sprint}-${Date.now()}`);
+  await writeChartToFile(chart, "./out", `sprint${sprint}-latest`);
   log.info(
-    JSON.stringify({ message: "Generated burndown chart", sprint, chartData })
+    JSON.stringify({ message: "Generated burndown chart", sprint, data })
   );
 };
 
