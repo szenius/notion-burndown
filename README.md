@@ -26,7 +26,7 @@ npm start
 
 A burndown chart PNG file should be generated in the project root directory.
 
-You will need to schedule this script to run once every day.
+You will need to schedule this script to run once every day. To do so, you can reference [the example GitHub action on_daily workflow](.github/workflows/running_integration).
 
 ## Notion Template
 
