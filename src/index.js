@@ -60,13 +60,8 @@ const countPointsLeftInSprint = async (sprint) => {
   return ongoingStories.reduce((accum, item) => {
     if (item.properties[BACKLOG_PROPERTY_STORY_POINTS]) {
       // Only including stories with numeric estimates
-      const points = parseInt(
-        item.properties[BACKLOG_PROPERTY_STORY_POINTS].select.name,
-        10
-      );
-      if (!Number.isNaN(points)) {
-        return accum + points;
-      }
+      const points = item.properties[BACKLOG_PROPERTY_STORY_POINTS].number;
+      return accum + points;
     }
     return accum;
   }, 0);
