@@ -51,12 +51,20 @@ const countPointsLeftInSprint = async (sprint) => {
     },
   });
   const sprintStories = response.results;
-  const ongoingStories = sprintStories.filter(
-    (item) =>
-      !new RegExp(BACKLOG_PROPERTY_EXCLUDE_STATUS_PATTERN).test(
-        item.properties.Status.select.name
-      )
-  );
+  const ongoingStories = sprintStories.filter((item) => {
+    if (!item.properties.Status) {
+      log.warn(
+        JSON.stringify({
+          message: "Story does not have Status field",
+          item,
+        })
+      );
+      return false;
+    }
+    return !new RegExp(BACKLOG_PROPERTY_EXCLUDE_STATUS_PATTERN).test(
+      item.properties.Status.select.name
+    );
+  });
   return ongoingStories.reduce((accum, item) => {
     if (item.properties[BACKLOG_PROPERTY_STORY_POINTS]) {
       // Only including stories with numeric estimates
