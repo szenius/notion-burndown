@@ -234,7 +234,7 @@ const getIdealBurndown = (start, end, initialPoints, numberOfWeekdays) => {
 
   // rounds to 2 decimal places, which prevents the graph from getting jagged
   // from overtruncation when there's less than 30 points
-  return idealBurndown.map((points) => Math.round(points * 100) / 100);
+  return idealBurndown.map((points) => +points.toFixed(2));
 };
 
 /**
