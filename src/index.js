@@ -232,7 +232,9 @@ const getIdealBurndown = (start, end, initialPoints, numberOfWeekdays) => {
     isPrevDayWeekday = !isWeekend(cur);
   }
 
-  return idealBurndown;
+  // rounds to 2 decimal places, which prevents the graph from getting jagged
+  // from overtruncation when there's less than 30 points
+  return idealBurndown.map(points => Math.round(points*100)/100);
 };
 
 /**
