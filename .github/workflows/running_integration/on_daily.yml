@@ -3,7 +3,7 @@ name: Daily
 # TODO: uncomment for this workflow to be scheduled
 # on:
 #   schedule:
-#     - cron: "0 0 * * 1-5"
+#     - cron: "0 0 * * *" # change to "0 0 * * 1-5" if INCLUDE_WEEKENDS = false
 
 jobs:
   run_schedule:
