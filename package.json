@@ -1,12 +1,13 @@
 {
   "name": "notion",
   "version": "1.0.0",
-  "description": "Tools based on Notion API",
+  "description": "Burndown chart from Notion db",
   "main": "index.js",
   "scripts": {
     "lint": "npx prettier --check .",
     "lint:fix": "npx prettier --write .",
-    "start": "node -r dotenv/config index.js"
+    "start": "node index.js",
+    "start:dev": "NODE_ENV=offline node index.js"
   },
   "repository": {
     "type": "git",
@@ -26,6 +27,8 @@
     "prettier": "2.3.2"
   },
   "dependencies": {
+    "@actions/core": "^1.5.0",
+    "@actions/github": "^5.0.0",
     "@notionhq/client": "^0.1.9",
     "chart.js-image": "^5.6.0",
     "dotenv": "^10.0.0",

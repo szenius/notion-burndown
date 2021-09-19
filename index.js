@@ -3,30 +3,21 @@ const moment = require("moment");
 const ChartJSImage = require("chart.js-image");
 const log = require("loglevel");
 const fs = require("fs");
+const core = require("@actions/core");
+const github = require("@actions/github");
 
-const notion = new Client({ auth: process.env.NOTION_KEY });
 log.setLevel("info");
+require("dotenv").config();
 
-const {
-  DATABASE_ID_BACKLOG: DB_ID_BACKLOG,
-  DATABASE_ID_SPRINT_SUMMARY: DB_ID_SPRINT_SUMMARY,
-  DATABASE_ID_DAILY_SUMMARY: DB_ID_DAILY_SUMMARY,
-  BACKLOG_PROPERTY_SPRINT,
-  BACKLOG_PROPERTY_EXCLUDE_STATUS_PATTERN,
-  BACKLOG_PROPERTY_STORY_POINTS,
-  MODE,
-  INCLUDE_WEEKENDS = "true",
-} = process.env;
-const isWeekendsIncluded = INCLUDE_WEEKENDS === "true";
-
-log.info(JSON.stringify({ MODE }));
-
-const getLatestSprintSummary = async () => {
+const getLatestSprintSummary = async (
+  notion,
+  { NOTION_DB_SPRINT_SUMMARY, NOTION_PROPERTY_SPRINT }
+) => {
   const response = await notion.databases.query({
-    database_id: DB_ID_SPRINT_SUMMARY,
+    database_id: NOTION_DB_SPRINT_SUMMARY,
     sorts: [
       {
-        property: BACKLOG_PROPERTY_SPRINT,
+        property: NOTION_PROPERTY_SPRINT,
         direction: "descending",
       },
     ],
@@ -40,11 +31,20 @@ const getLatestSprintSummary = async () => {
   };
 };
 
-const countPointsLeftInSprint = async (sprint) => {
+const countPointsLeftInSprint = async (
+  notion,
+  sprint,
+  {
+    NOTION_DB_BACKLOG,
+    NOTION_PROPERTY_SPRINT,
+    NOTION_PROPERTY_PATTERN_STATUS_EXCLUDE,
+    NOTION_PROPERTY_ESTIMATE,
+  }
+) => {
   const response = await notion.databases.query({
-    database_id: DB_ID_BACKLOG,
+    database_id: NOTION_DB_BACKLOG,
     filter: {
-      property: BACKLOG_PROPERTY_SPRINT,
+      property: NOTION_PROPERTY_SPRINT,
       select: {
         equals: `Sprint ${sprint}`,
       },
@@ -53,24 +53,29 @@ const countPointsLeftInSprint = async (sprint) => {
   const sprintStories = response.results;
   const ongoingStories = sprintStories.filter(
     (item) =>
-      !new RegExp(BACKLOG_PROPERTY_EXCLUDE_STATUS_PATTERN).test(
+      !new RegExp(NOTION_PROPERTY_PATTERN_STATUS_EXCLUDE).test(
         item.properties.Status.select.name
       )
   );
   return ongoingStories.reduce((accum, item) => {
-    if (item.properties[BACKLOG_PROPERTY_STORY_POINTS]) {
-      const points = item.properties[BACKLOG_PROPERTY_STORY_POINTS].number;
+    if (item.properties[NOTION_PROPERTY_ESTIMATE]) {
+      const points = item.properties[NOTION_PROPERTY_ESTIMATE].number;
       return accum + points;
     }
     return accum;
   }, 0);
 };
 
-const updateDailySummaryTable = async (sprint, pointsLeft) => {
+const updateDailySummaryTable = async (
+  notion,
+  sprint,
+  pointsLeft,
+  { NOTION_DB_DAILY_SUMMARY }
+) => {
   const today = moment().startOf("day").format("YYYY-MM-DD");
   await notion.pages.create({
     parent: {
-      database_id: DB_ID_DAILY_SUMMARY,
+      database_id: NOTION_DB_DAILY_SUMMARY,
     },
     properties: {
       Name: {
@@ -122,9 +127,15 @@ const getNumberOfWeekdays = (start, end) => {
  * @param {moment.Moment} start First day of sprint (inclusive)
  * @returns {number[]} Array of points left each day from {@link start} till today (inclusive)
  * */
-const getPointsLeftByDay = async (sprint, start) => {
+const getPointsLeftByDay = async (
+  notion,
+  sprint,
+  start,
+  isWeekendsIncluded,
+  { NOTION_DB_DAILY_SUMMARY }
+) => {
   const response = await notion.databases.query({
-    database_id: DB_ID_DAILY_SUMMARY,
+    database_id: NOTION_DB_DAILY_SUMMARY,
     filter: {
       property: "Sprint",
       number: {
@@ -193,7 +204,13 @@ const getPointsLeftByDay = async (sprint, start) => {
  * @param {number} numberOfWeekdays Number of working days in the sprint
  * @returns {number[]} Array of the ideal points left per day
  */
-const getIdealBurndown = (start, end, initialPoints, numberOfWeekdays) => {
+const getIdealBurndown = (
+  start,
+  end,
+  initialPoints,
+  numberOfWeekdays,
+  isWeekendsIncluded
+) => {
   const pointsPerDay = initialPoints / numberOfWeekdays;
 
   log.info(
@@ -248,17 +265,31 @@ const getChartLabels = (numberOfDays) =>
  * @param {moment.Moment} end End date of sprint (excluded)
  * @returns The chart labels, data line, and ideal burndown line
  */
-const getChartDatasets = async (sprint, start, end) => {
+const getChartDatasets = async (
+  notion,
+  sprint,
+  start,
+  end,
+  isWeekendsIncluded,
+  { NOTION_DB_DAILY_SUMMARY }
+) => {
   const numDaysInSprint = moment(end).diff(start, "days") + 1;
   const lastFullDay = moment(end).add(-1, "days");
   const numWeekdays = getNumberOfWeekdays(start, lastFullDay);
 
-  const pointsLeftByDay = await getPointsLeftByDay(sprint, start);
+  const pointsLeftByDay = await getPointsLeftByDay(
+    notion,
+    sprint,
+    start,
+    isWeekendsIncluded,
+    { NOTION_DB_DAILY_SUMMARY }
+  );
   const idealBurndown = getIdealBurndown(
     start,
     end,
     pointsLeftByDay[0],
-    numWeekdays
+    numWeekdays,
+    isWeekendsIncluded
   );
   const labels = getChartLabels(
     isWeekendsIncluded ? numDaysInSprint : numWeekdays + 1
@@ -332,13 +363,60 @@ const writeChartToFile = async (chart, dir, filenamePrefix) => {
   await chart.toFile(`${dir}/${filenamePrefix}-burndown.png`);
 };
 
-const updateSprintSummary = async () => {
-  const { sprint, start, end } = await getLatestSprintSummary();
+const parseConfig = () => {
+  if (process.env.NODE_ENV === "offline") {
+    return {
+      notion: new Client({ auth: process.env.NOTION_KEY }),
+      NOTION_DB_BACKLOG: process.env.NOTION_DB_BACKLOG,
+      NOTION_DB_SPRINT_SUMMARY: process.env.NOTION_DB_SPRINT_SUMMARY,
+      NOTION_DB_DAILY_SUMMARY: process.env.NOTION_DB_DAILY_SUMMARY,
+      NOTION_PROPERTY_SPRINT: process.env.NOTION_PROPERTY_SPRINT,
+      NOTION_PROPERTY_ESTIMATE: process.env.NOTION_PROPERTY_ESTIMATE,
+      NOTION_PROPERTY_PATTERN_STATUS_EXCLUDE:
+        process.env.NOTION_PROPERTY_PATTERN_STATUS_EXCLUDE,
+      INCLUDE_WEEKENDS: process.env.INCLUDE_WEEKENDS !== "false",
+    };
+  }
+  return {
+    notion: new Client({ auth: core.getInput("NOTION_KEY") }),
+    NOTION_DB_BACKLOG: core.getInput("NOTION_DB_BACKLOG"),
+    NOTION_DB_SPRINT_SUMMARY: core.getInput("NOTION_DB_SPRINT_SUMMARY"),
+    NOTION_DB_DAILY_SUMMARY: core.getInput("NOTION_DB_DAILY_SUMMARY"),
+    NOTION_PROPERTY_SPRINT: core.getInput("NOTION_PROPERTY_SPRINT"),
+    NOTION_PROPERTY_ESTIMATE: core.getInput("NOTION_PROPERTY_ESTIMATE"),
+    NOTION_PROPERTY_PATTERN_STATUS_EXCLUDE: core.getInput(
+      "NOTION_PROPERTY_PATTERN_STATUS_EXCLUDE"
+    ),
+    INCLUDE_WEEKENDS: core.getInput("INCLUDE_WEEKENDS") !== "false",
+  };
+};
+
+const run = async () => {
+  const {
+    notion,
+    NOTION_DB_BACKLOG,
+    NOTION_DB_SPRINT_SUMMARY,
+    NOTION_DB_DAILY_SUMMARY,
+    NOTION_PROPERTY_SPRINT,
+    NOTION_PROPERTY_ESTIMATE,
+    NOTION_PROPERTY_PATTERN_STATUS_EXCLUDE,
+    INCLUDE_WEEKENDS,
+  } = parseConfig();
+
+  const { sprint, start, end } = await getLatestSprintSummary(notion, {
+    NOTION_DB_SPRINT_SUMMARY,
+    NOTION_PROPERTY_SPRINT,
+  });
   log.info(
     JSON.stringify({ message: "Found latest sprint", sprint, start, end })
   );
 
-  const pointsLeftInSprint = await countPointsLeftInSprint(sprint);
+  const pointsLeftInSprint = await countPointsLeftInSprint(notion, sprint, {
+    NOTION_DB_BACKLOG,
+    NOTION_PROPERTY_SPRINT,
+    NOTION_PROPERTY_PATTERN_STATUS_EXCLUDE,
+    NOTION_PROPERTY_ESTIMATE,
+  });
   log.info(
     JSON.stringify({
       message: "Counted points left in sprint",
@@ -347,7 +425,9 @@ const updateSprintSummary = async () => {
     })
   );
 
-  await updateDailySummaryTable(sprint, pointsLeftInSprint);
+  await updateDailySummaryTable(notion, sprint, pointsLeftInSprint, {
+    NOTION_DB_DAILY_SUMMARY,
+  });
   log.info(
     JSON.stringify({
       message: "Updated daily summary table",
@@ -360,7 +440,14 @@ const updateSprintSummary = async () => {
     labels,
     pointsLeftByDay: data,
     idealBurndown,
-  } = await getChartDatasets(sprint, start, end);
+  } = await getChartDatasets(
+    notion,
+    sprint,
+    start,
+    end,
+    INCLUDE_WEEKENDS === "true",
+    { NOTION_DB_DAILY_SUMMARY }
+  );
   log.info(JSON.stringify({ labels, data, idealBurndown }));
   const chart = generateChart(data, idealBurndown, labels);
 
@@ -371,4 +458,4 @@ const updateSprintSummary = async () => {
   );
 };
 
-updateSprintSummary();
+run();
