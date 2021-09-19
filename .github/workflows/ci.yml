@@ -1,21 +1,21 @@
 on:
-  push:
-    branches:
-      - master
-  pull_request:
-    branches:
-      - master
-  page_build:
-  release:
-    types:
-      - created
+    push:
+        branches:
+            - master
+    pull_request:
+        branches:
+            - master
+    page_build:
+    release:
+        types:
+            - created
 
 jobs:
-  ci:
-    runs-on: ubuntu-latest
-    name: CI
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Lint
-        run: npm run lint
+    ci:
+        runs-on: ubuntu-latest
+        name: CI
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v2
+            - name: Lint
+              run: npm run lint
