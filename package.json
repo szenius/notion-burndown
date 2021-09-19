@@ -7,7 +7,8 @@
         "lint": "npx prettier --check .",
         "lint:fix": "npx prettier --write .",
         "start": "node index.js",
-        "start:dev": "NODE_ENV=offline node index.js"
+        "start:dev": "NODE_ENV=offline node index.js",
+        "build": "ncc build index.js --license licenses.txt"
     },
     "repository": {
         "type": "git",
@@ -20,6 +21,7 @@
     },
     "homepage": "https://github.com/szenius/notion#readme",
     "devDependencies": {
+        "@vercel/ncc": "^0.31.1",
         "eslint": "^7.31.0",
         "eslint-config-airbnb-base": "^14.2.1",
         "eslint-config-prettier": "^8.3.0",
