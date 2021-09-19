@@ -1,0 +1,34 @@
+name: "Notion Burndown Chart"
+description: "Generates Burndown Chart based on Scrum backlog in Notion database"
+branding:
+  icon: bar-chart-2
+  color: green
+inputs:
+  notion-key:
+    description: "Notion integration access token"
+    required: true
+  notion-db-backlog:
+    description: "Notion Database ID of Sprint Backlog"
+    required: true
+  notion-db-sprint-summary:
+    description: "Notion Database ID of Sprint Summary"
+    required: true
+  notion-db-daily-summary:
+    description: "Notion Database ID of Daily Summary"
+    required: true
+  notion-property-sprint:
+    description: "Name of the property with the sprint number"
+    required: true
+  notion-property-estimate:
+    description: "Name of the property with the estimate"
+    required: true
+  notion-property-exclude-status-pattern:
+    description: "Regex of the statuses of stories which are done"
+    required: true
+  include-weekends:
+    description: "true if weekends should be included in the chart, false otherwise."
+    required: false
+    default: "true"
+runs:
+  using: "node12"
+  main: "index.js"

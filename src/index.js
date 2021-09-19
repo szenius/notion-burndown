@@ -363,6 +363,7 @@ const updateSprintSummary = async () => {
   } = await getChartDatasets(sprint, start, end);
   log.info(JSON.stringify({ labels, data, idealBurndown }));
   const chart = generateChart(data, idealBurndown, labels);
+
   await writeChartToFile(chart, "./out", `sprint${sprint}-${Date.now()}`);
   await writeChartToFile(chart, "./out", `sprint${sprint}-latest`);
   log.info(
