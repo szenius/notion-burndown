@@ -4,11 +4,11 @@
     "description": "Burndown chart from Notion db",
     "main": "index.js",
     "scripts": {
+        "build": "ncc build index.js --license licenses.txt",
         "lint": "npx prettier --check .",
         "lint:fix": "npx prettier --write .",
         "start": "node index.js",
-        "start:dev": "NODE_ENV=offline node index.js",
-        "build": "ncc build index.js --license licenses.txt"
+        "start:dev": "NODE_ENV=offline node index.js"
     },
     "repository": {
         "type": "git",
