@@ -243,11 +243,9 @@ const getIdealBurndown = (start, end, initialPoints, numberOfWeekdays) => {
  * @param {number} numberOfDays Number of workdays in the sprint
  * @returns {number[]} Labels for the chart
  */
-const getChartLabels = (numberOfDays) => {
+const getChartLabels = (numberOfDays) =>
   // cool way to generate numbers from 1 to n
-  return [...Array(numberOfDays).keys()].map((i) => i + 1);
-};
-
+  [...Array(numberOfDays).keys()].map((i) => i + 1);
 /**
  * Generates the data to be displayed on the chart. Work is assumed to be
  * done on each day from the start until the day before {@link end}.
