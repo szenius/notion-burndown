@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "Tools based on Notion API",
   "main": "index.js",
-  "type": "module",
   "scripts": {
     "lint": "npx prettier --check .",
     "lint:fix": "npx prettier --write .",

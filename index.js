@@ -1,8 +1,8 @@
-import { Client } from "@notionhq/client";
-import moment from "moment";
-import ChartJSImage from "chart.js-image";
-import log from "loglevel";
-import fs from "fs";
+const { Client } = require("@notionhq/client");
+const moment = require("moment");
+const ChartJSImage = require("chart.js-image");
+const log = require("loglevel");
+const fs = require("fs");
 
 const notion = new Client({ auth: process.env.NOTION_KEY });
 log.setLevel("info");
