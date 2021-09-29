@@ -4,7 +4,7 @@ Generates burndown charts based on Notion databases.
 
 This goes out to all of us who chose to put our scrum boards on Notion even though it doesn't have proper scrum features... Just because it's \*~aesthetic~\*.
 
-## Set up
+## Usage
 
 ### Step 1. One-time setup on Notion
 
@@ -35,16 +35,6 @@ with:
 ```
 
 See [the scheduled daily workflow](.github/workflows/on_daily.yml) as an example for how you can set up your own.
-
-## Usage
-
-```
-npm start
-```
-
-A burndown chart PNG file should be generated in the project root directory.
-
-You will need to schedule this script to run once every day. To do so, you can reference [the example GitHub action on_daily workflow](.github/workflows/running_integration).
 
 ## Notion Template
 
