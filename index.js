@@ -4,7 +4,6 @@ const ChartJSImage = require("chart.js-image");
 const log = require("loglevel");
 const fs = require("fs");
 const core = require("@actions/core");
-const github = require("@actions/github");
 
 log.setLevel("info");
 require("dotenv").config();
