@@ -1,41 +1,41 @@
 {
-    "name": "notion",
-    "version": "1.0.0",
-    "description": "Burndown chart from Notion db",
-    "main": "index.js",
-    "scripts": {
-        "build": "ncc build index.js --license licenses.txt",
-        "lint": "npx prettier --check .",
-        "lint:fix": "npx prettier --write .",
-        "start": "node index.js",
-        "start:dev": "NODE_ENV=offline node index.js"
-    },
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/szenius/notion-burndown.git"
-    },
-    "author": "",
-    "license": "ISC",
-    "bugs": {
-        "url": "https://github.com/szenius/notion-burndown/issues"
-    },
-    "homepage": "https://github.com/szenius/notion-burndown#readme",
-    "devDependencies": {
-        "@vercel/ncc": "^0.31.1",
-        "eslint": "^7.31.0",
-        "eslint-config-airbnb-base": "^14.2.1",
-        "eslint-config-prettier": "^8.3.0",
-        "eslint-plugin-import": "^2.23.4",
-        "prettier": "2.3.2"
-    },
-    "dependencies": {
-        "@actions/core": "^1.5.0",
-        "@actions/github": "^5.0.0",
-        "@notionhq/client": "^0.1.9",
-        "chart.js-image": "^5.6.0",
-        "dotenv": "^10.0.0",
-        "lodash": "^4.17.21",
-        "loglevel": "^1.7.1",
-        "moment": "^2.29.1"
-    }
+  "name": "notion",
+  "version": "1.0.0",
+  "description": "Burndown chart from Notion db",
+  "main": "index.js",
+  "scripts": {
+    "build": "ncc build index.js --license licenses.txt",
+    "lint": "npx prettier --check .",
+    "lint:fix": "npx prettier --write .",
+    "start": "node index.js",
+    "start:dev": "NODE_ENV=offline node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/szenius/notion-burndown.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/szenius/notion-burndown/issues"
+  },
+  "homepage": "https://github.com/szenius/notion-burndown#readme",
+  "devDependencies": {
+    "@vercel/ncc": "^0.31.1",
+    "eslint": "^7.31.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-import": "^2.23.4",
+    "prettier": "2.3.2"
+  },
+  "dependencies": {
+    "@actions/core": "^1.5.0",
+    "@actions/github": "^5.0.0",
+    "@notionhq/client": "^0.1.9",
+    "chart.js-image": "^5.6.0",
+    "dotenv": "^10.0.0",
+    "lodash": "^4.17.21",
+    "loglevel": "^1.7.1",
+    "moment": "^2.29.1"
+  }
 }

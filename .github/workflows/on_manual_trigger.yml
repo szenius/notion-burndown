@@ -1,34 +1,34 @@
 name: on manual trigger
 
 on:
-    workflow_dispatch:
-        inputs:
+  workflow_dispatch:
+    inputs:
 
 jobs:
-    generate_burndown_chart:
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v2
-            - run: npm i
-            - name: Generate burndown chart
-              uses: ./
-              with:
-                  NOTION_KEY: ${{ secrets.NOTION_KEY }}
-                  NOTION_DB_BACKLOG: ${{ secrets.NOTION_DB_BACKLOG }}
-                  NOTION_DB_SPRINT_SUMMARY: ${{ secrets.NOTION_DB_SPRINT_SUMMARY }}
-                  NOTION_DB_DAILY_SUMMARY: ${{ secrets.NOTION_DB_DAILY_SUMMARY }}
-                  NOTION_PROPERTY_SPRINT: ${{ secrets.NOTION_PROPERTY_SPRINT }}
-                  NOTION_PROPERTY_ESTIMATE: ${{ secrets.NOTION_PROPERTY_ESTIMATE }}
-                  NOTION_PROPERTY_PATTERN_STATUS_EXCLUDE: ${{ secrets.NOTION_PROPERTY_PATTERN_STATUS_EXCLUDE }}
-            - name: Commit burndown chart
-              run: |
-                  git config --local user.email "ting.szeying@gmail.com"
-                  git config --local user.name "szenius"
-                  git add ./out
-                  git commit -m "run: upload new burndown chart"
-            - name: Push changes
-              uses: ad-m/github-push-action@master
-              with:
-                  github_token: ${{ secrets.GH_TOKEN }}
-                  force: true
+  generate_burndown_chart:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - run: npm i
+      - name: Generate burndown chart
+        uses: ./
+        with:
+          NOTION_KEY: ${{ secrets.NOTION_KEY }}
+          NOTION_DB_BACKLOG: ${{ secrets.NOTION_DB_BACKLOG }}
+          NOTION_DB_SPRINT_SUMMARY: ${{ secrets.NOTION_DB_SPRINT_SUMMARY }}
+          NOTION_DB_DAILY_SUMMARY: ${{ secrets.NOTION_DB_DAILY_SUMMARY }}
+          NOTION_PROPERTY_SPRINT: ${{ secrets.NOTION_PROPERTY_SPRINT }}
+          NOTION_PROPERTY_ESTIMATE: ${{ secrets.NOTION_PROPERTY_ESTIMATE }}
+          NOTION_PROPERTY_PATTERN_STATUS_EXCLUDE: ${{ secrets.NOTION_PROPERTY_PATTERN_STATUS_EXCLUDE }}
+      - name: Commit burndown chart
+        run: |
+          git config --local user.email "ting.szeying@gmail.com"
+          git config --local user.name "szenius"
+          git add ./out
+          git commit -m "run: upload new burndown chart"
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GH_TOKEN }}
+          force: true
