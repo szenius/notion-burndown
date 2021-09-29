@@ -1,0 +1,48 @@
+name: on master
+
+on:
+    push:
+        branches:
+            - master
+
+jobs:
+    bump_and_push:
+        runs-on: ubuntu-latest
+        name: Bump and push
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v2
+            - name: Install
+              run: npm ci
+            - name: Build
+              run: npm run build
+            - name: Commit dist files
+              continue-on-error: true
+              run: |
+                  git config --local user.email "ting.szeying@gmail.com"
+                  git config --local user.name "szenius"
+                  git add ./dist
+                  git commit -m "build: update dist files"
+            - name: Push changes
+              continue-on-error: true
+              uses: ad-m/github-push-action@master
+              with:
+                  github_token: ${{ secrets.GH_TOKEN }}
+                  force: true
+            - name: Bump version and push tag
+              id: version
+              uses: anothrNick/github-tag-action@1.35.0
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+                  WITH_V: false
+                  RELEASE_BRANCHES: master
+                  DEFAULT_BUMP: patch
+                  INITIAL_VERSION: 1.0.0
+            - name: Update Notion property
+              uses: ./
+              with:
+                  gh-username: "szenius"
+                  gh-token: ${{ secrets.GH_TOKEN }}
+                  notion-key: ${{ secrets.NOTION_KEY }}
+                  notion-property-name: "Version Tag"
+                  notion-update-value: "${{ steps.version.outputs.new_tag }}"
