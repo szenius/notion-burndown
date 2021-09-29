@@ -26,7 +26,7 @@ inputs:
         description: "Regex of the statuses of stories which are done"
         required: true
     INCLUDE_WEEKENDS:
-        description: "true if weekends should be included in the chart, false otherwise."
+        description: "True if weekends should be included in the chart, false otherwise."
         required: false
         default: "true"
 runs:
