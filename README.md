@@ -17,6 +17,8 @@ This goes out to all of us who chose to put our scrum boards on Notion even thou
       1. Compulsory fields: Sprint (number), Date (Date), Points (number)
 3. [Give your integration access to all 3 databases.](https://developers.notion.com/docs/getting-started#step-2-share-a-database-with-your-integration)
 
+You may refer to [this Notion page](https://szenius.notion.site/Notion-Burndown-Chart-390ba59cef094387900a26f75c108385) for setting up your own databases.
+
 ### Step 2. Schedule the integration to run daily
 
 This project is published as a GitHub action in the marketplace. You can make use of scheduled GitHub workflows to run it for free.
@@ -35,13 +37,3 @@ with:
 ```
 
 See [the scheduled daily workflow](.github/workflows/on_daily.yml) as an example for how you can set up your own.
-
-## Notion Template
-
-Reference [this Notion page](https://szenius.notion.site/Notion-Burndown-Chart-390ba59cef094387900a26f75c108385) to see how I set up my three databases.
-
-The configurations for this example are found in [.env.template](./.env.template).
-
-## Future Work
-
-See issues.
