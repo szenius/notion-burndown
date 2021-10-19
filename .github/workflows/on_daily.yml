@@ -10,7 +10,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - run: npm i
+      - run: npm ci
       - run: npm start
         env:
           MODE: manual
