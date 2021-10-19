@@ -119,7 +119,7 @@ const getNumberOfWeekdays = (start, end) => {
   let weekdays = 0;
   for (const cur = moment(start); !cur.isAfter(end); cur.add(1, "days")) {
     if (!isWeekend(cur)) {
-      weekdays++;
+      weekdays += 1;
     }
   }
   return weekdays;
@@ -182,7 +182,7 @@ const getPointsLeftByDay = async (sprint, start) => {
       if (isWeekend(cur)) {
         pointsLeftByDay.splice(index, 1);
       } else {
-        index++;
+        index += 1;
       }
     }
   }
@@ -217,7 +217,7 @@ const getIdealBurndown = (start, end, initialPoints, numberOfWeekdays) => {
   const cur = moment(start);
   const afterEnd = moment(end).add(1, "days"); // to include the end day data point
   let isPrevDayWeekday = false;
-  for (let index = 0; cur.isBefore(afterEnd); index++, cur.add(1, "days")) {
+  for (let index = 0; cur.isBefore(afterEnd); index += 1, cur.add(1, "days")) {
     // if not including the weekends, just skip over the weekend days
     if (!isWeekendsIncluded) {
       while (isWeekend(cur)) {
@@ -246,11 +246,9 @@ const getIdealBurndown = (start, end, initialPoints, numberOfWeekdays) => {
  * @param {number} numberOfDays Number of workdays in the sprint
  * @returns {number[]} Labels for the chart
  */
-const getChartLabels = (numberOfDays) => {
+const getChartLabels = (numberOfDays) =>
   // cool way to generate numbers from 1 to n
-  return [...Array(numberOfDays).keys()].map((i) => i + 1);
-};
-
+  [...Array(numberOfDays).keys()].map((i) => i + 1);
 /**
  * Generates the data to be displayed on the chart. Work is assumed to be
  * done on each day from the start until the day before {@link end}.

@@ -5,8 +5,8 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "lint": "npx prettier --check .",
-    "lint:fix": "npx prettier --write .",
+    "lint": "npx eslint . --ext ts,js --max-warnings 0",
+    "lint:fix": "npm run lint -- --fix",
     "start": "node -r dotenv/config src/index.js"
   },
   "repository": {
