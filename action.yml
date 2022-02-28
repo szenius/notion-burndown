@@ -22,7 +22,7 @@ inputs:
   NOTION_PROPERTY_ESTIMATE:
     description: "Name of the property with the estimate"
     required: true
-  NOTION_PROPERTY_PATTERN_STATUS_EXCLUDE:
+  NOTION_PROPERTY_PATTERN_STATUS_INCLUDE:
     description: "Regex of the statuses of stories which are done"
     required: true
   INCLUDE_WEEKENDS:

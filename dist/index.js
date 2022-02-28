@@ -17739,7 +17739,7 @@ const parseConfig = () => {
         options: {
           sprintProp: process.env.NOTION_PROPERTY_SPRINT,
           estimateProp: process.env.NOTION_PROPERTY_ESTIMATE,
-          statusExclude: process.env.NOTION_PROPERTY_PATTERN_STATUS_EXCLUDE,
+          statusInclude: process.env.NOTION_PROPERTY_PATTERN_STATUS_INCLUDE,
         },
       },
       chartOptions: {
@@ -17758,7 +17758,7 @@ const parseConfig = () => {
       options: {
         sprintProp: core.getInput("NOTION_PROPERTY_SPRINT"),
         estimateProp: core.getInput("NOTION_PROPERTY_ESTIMATE"),
-        statusExclude: core.getInput("NOTION_PROPERTY_PATTERN_STATUS_EXCLUDE"),
+        statusInclude: core.getInput("NOTION_PROPERTY_PATTERN_STATUS_INCLUDE"),
       },
     },
     chartOptions: {
@@ -17794,7 +17794,7 @@ const countPointsLeftInSprint = async (
   notion,
   backlogDb,
   sprint,
-  { sprintProp, estimateProp, statusExclude }
+  { sprintProp, estimateProp, statusInclude }
 ) => {
   const response = await notion.databases.query({
     database_id: backlogDb,
@@ -17808,7 +17808,7 @@ const countPointsLeftInSprint = async (
   const sprintStories = response.results;
   const ongoingStories = sprintStories.filter(
     (item) =>
-      !new RegExp(statusExclude).test(item.properties.Status.select.name)
+      new RegExp(statusInclude).test(item.properties.Status.select.name)
   );
   return ongoingStories.reduce((accum, item) => {
     if (item.properties[estimateProp]) {
@@ -18135,7 +18135,7 @@ const run = async () => {
     {
       sprintProp: notion.options.sprintProp,
       estimateProp: notion.options.estimateProp,
-      statusExclude: notion.options.statusExclude,
+      statusInclude: notion.options.statusInclude,
     }
   );
   log.info(

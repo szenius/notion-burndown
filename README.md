@@ -32,7 +32,7 @@ with:
     NOTION_DB_DAILY_SUMMARY: "Notion Database ID of Daily Summary"
     NOTION_PROPERTY_SPRINT: "Name of the property with the sprint number"
     NOTION_PROPERTY_ESTIMATE: "Name of the property with the estimate"
-    NOTION_PROPERTY_PATTERN_STATUS_EXCLUDE: "Regex of the statuses of stories which are done"
+    NOTION_PROPERTY_PATTERN_STATUS_INCLUDE: "Regex of the statuses of stories which are done"
     INCLUDE_WEEKENDS: "True if weekends should be included in the chart, false otherwise."
 ```
 

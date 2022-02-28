@@ -20,7 +20,7 @@ jobs:
           NOTION_DB_DAILY_SUMMARY: 534fa46ea72e4bcabee09db941d59346
           NOTION_PROPERTY_SPRINT: Sprint
           NOTION_PROPERTY_ESTIMATE: Story points raw number
-          NOTION_PROPERTY_PATTERN_STATUS_EXCLUDE: "^(?!Tasks)"
+          NOTION_PROPERTY_PATTERN_STATUS_INCLUDE: "^(Tasks)|(In Progress)$"
       - name: Commit burndown chart
         run: |
           git config --local user.email "anson.yuen@r2c2.ai"
