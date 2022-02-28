@@ -186,7 +186,7 @@ const getPointsLeftByDay = async (
   });
   const pointsLeftByDay = [];
   response.results.forEach((result) => {
-    console.log('results: ', properties)
+    console.log('results: ', result)
     const { properties } = result;
     console.log('properties: ', properties)
     const { Date, Points } = properties;
