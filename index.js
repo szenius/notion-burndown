@@ -189,26 +189,28 @@ const getPointsLeftByDay = async (
     console.log('results: ', result)
     const { properties } = result;
     console.log('properties: ', properties)
-    const { Date, Points } = properties;
-    console.log('Date: ', Date)
+    console.log('properties.Date: ', properties.Date)
+    console.log('properties.Points: ', properties.Points)
+    const { Date: date, Points: points } = properties;
+    console.log('Date: ', date)
     try {
       console.log('Trying to print Date.date')
-      console.log(Date.date)
+      console.log(date.date)
     } catch (e) {
       console.error(e)
     }
-    console.log('Points: ', Date)
-    const day = moment(Date.date.start).diff(start, "days");
+    console.log('Points: ', date)
+    const day = moment(date.date.start).diff(start, "days");
     if (pointsLeftByDay[day]) {
       log.warn(
         JSON.stringify({
           message: "Found duplicate entry",
-          date: Date.date.start,
-          points: Points.number,
+          date: date.date.start,
+          points: points.number,
         })
       );
     }
-    pointsLeftByDay[day] = Points.number;
+    pointsLeftByDay[day] = points.number;
   });
   const numDaysSinceSprintStart = moment().startOf("day").diff(start, "days");
   for (let i = 0; i < numDaysSinceSprintStart; i += 1) {
