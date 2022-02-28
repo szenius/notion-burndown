@@ -196,7 +196,9 @@ const getPointsLeftByDay = async (
     try {
       console.log('Trying to print Date.date')
       console.log(date.date)
+      console.log(date.date.start)
     } catch (e) {
+      console.log('Failed to print Date.date')
       console.error(e)
     }
     console.log('Points: ', date)
