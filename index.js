@@ -186,8 +186,18 @@ const getPointsLeftByDay = async (
   });
   const pointsLeftByDay = [];
   response.results.forEach((result) => {
+    console.log('results: ', properties)
     const { properties } = result;
+    console.log('properties: ', properties)
     const { Date, Points } = properties;
+    console.log('Date: ', Date)
+    try {
+      console.log('Trying to print Date.date')
+      console.log(Date.date)
+    } catch (e) {
+      console.error(e)
+    }
+    console.log('Points: ', Date)
     const day = moment(Date.date.start).diff(start, "days");
     if (pointsLeftByDay[day]) {
       log.warn(
