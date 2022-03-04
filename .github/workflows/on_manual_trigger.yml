@@ -38,6 +38,7 @@ jobs:
         id: date
         run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
       - name: Send burndown to Telegram
+        if: always()
         uses: appleboy/telegram-action@2e9996f96e095a537aa4442da4af41ca7b594fba
         with:
           to: ${{ secrets.TELEGRAM_TO }}
