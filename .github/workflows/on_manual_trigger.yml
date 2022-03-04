@@ -32,3 +32,13 @@ jobs:
         with:
           github_token: ${{ secrets.GH_TOKEN }}
           force: true
+      - name: Output current date
+        id: date
+        run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
+      - name: Send burndown to Telegram
+        uses: appleboy/telegram-action@2e9996f96e095a537aa4442da4af41ca7b594fba
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          github_token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: Burndown as of ${{ steps.date.outputs.date }}
+          photo: out/latest-burndown.png

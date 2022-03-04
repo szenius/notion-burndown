@@ -473,8 +473,8 @@ const run = async () => {
   log.info(JSON.stringify({ labels, data, idealBurndown }));
   const chart = generateChart(data, idealBurndown, labels);
 
-  await writeChartToFile(chart, "./out", `sprint${sprint}-${Date.now()}`);
   await writeChartToFile(chart, "./out", `sprint${sprint}-latest`);
+  await writeChartToFile(chart, "./out", `latest`);
   log.info(
     JSON.stringify({ message: "Generated burndown chart", sprint, data })
   );
