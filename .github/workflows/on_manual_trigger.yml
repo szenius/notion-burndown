@@ -43,5 +43,5 @@ jobs:
         with:
           to: ${{ secrets.TELEGRAM_TO }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
-          message: Burndown as of ${{ steps.date.outputs.date }}
+          message: "Burndown as of ${{ steps.date.outputs.date }} #burndown"
           photo: out/latest-burndown.png

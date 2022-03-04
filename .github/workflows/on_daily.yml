@@ -2,7 +2,7 @@ name: on daily
 
 on:
   schedule:
-    - cron: "0 0 * * *"
+    - cron: "0 19 * * *"
 
 jobs:
   generate_burndown_chart:
@@ -28,7 +28,20 @@ jobs:
           git add ./out
           git commit -m "run: upload new burndown chart"
       - name: Push changes
+        if: always()
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GH_TOKEN }}
           force: true
+      - name: Output current date
+        if: always()
+        id: date
+        run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
+      - name: Send burndown to Telegram
+        if: always()
+        uses: appleboy/telegram-action@2e9996f96e095a537aa4442da4af41ca7b594fba
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: "Burndown as of ${{ steps.date.outputs.date }} #burndown"
+          photo: out/latest-burndown.png
