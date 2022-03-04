@@ -36,12 +36,12 @@ jobs:
       - name: Output current date
         if: always()
         id: date
-        run: echo "::set-output name=date::$(TZ=Asia/Hong_Kong date +'%Y-%m-%d')"
+        run: echo "::set-output name=date::$(TZ=Pacific/Niue date +'%Y-%m-%d')"
       - name: Send burndown to Telegram
         if: always()
         uses: appleboy/telegram-action@2e9996f96e095a537aa4442da4af41ca7b594fba
         with:
           to: ${{ secrets.TELEGRAM_TO }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
-          message: "Burndown as of ${{ steps.date.outputs.date }} #burndown"
+          message: "Burndown as of ${{ steps.date.outputs.date }} (UTC+8) #burndown"
           photo: out/latest-burndown.png
