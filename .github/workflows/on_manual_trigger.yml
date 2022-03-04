@@ -26,7 +26,7 @@ jobs:
           git config --local user.email "anson.yuen@r2c2.ai"
           git config --local user.name "ansonyuenr2c2"
           git add ./out
-          bash -c "set +e; git commit -m "run: upload new burndown chart"; echo what why; true"
+          bash -c "set +e; git commit -m 'run: upload new burndown chart'; true"
       - name: Push changes
         uses: ad-m/github-push-action@master
         with:
