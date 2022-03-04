@@ -28,11 +28,13 @@ jobs:
           git add ./out
           git commit -m "run: upload new burndown chart"
       - name: Push changes
+        if: always()
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GH_TOKEN }}
           force: true
       - name: Output current date
+        if: always()
         id: date
         run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
       - name: Send burndown to Telegram
