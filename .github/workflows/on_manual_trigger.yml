@@ -28,10 +28,11 @@ jobs:
           git add ./out
           bash -c "set +e; git commit -m 'run: upload new burndown chart'; true"
       - name: Push changes
-        uses: ad-m/github-push-action@${{ GITHUB_REF_NAME }}
+        uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GH_TOKEN }}
           force: true
+          branch: ${{ github.ref }}
       - name: Output current date
         id: date
         run: echo "::set-output name=date::$(TZ=Asia/Hong_Kong date +'%Y-%m-%d')"
