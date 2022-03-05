@@ -28,7 +28,7 @@ jobs:
           git add ./out
           bash -c "set +e; git commit -m 'run: upload new burndown chart'; true"
       - name: Push changes
-        uses: ad-m/github-push-action@${{ env.GITHUB_REF_NAME }}
+        uses: ad-m/github-push-action@${{ github.GITHUB_REF_NAME }}
         with:
           github_token: ${{ secrets.GH_TOKEN }}
           force: true
