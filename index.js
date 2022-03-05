@@ -1,5 +1,5 @@
 const { Client } = require("@notionhq/client");
-const moment = require("moment");
+const moment = require("moment-timezone");
 moment.tz.setDefault("Pacific/Niue");
 const ChartJSImage = require("chart.js-image");
 const log = require("loglevel");
