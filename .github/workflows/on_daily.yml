@@ -2,7 +2,7 @@ name: on daily
 
 on:
   schedule:
-    - cron: "0 19 * * *"
+    - cron: "23 13 * * *" # UTC, = 21:30 UTC+8
 
 jobs:
   generate_burndown_chart:
