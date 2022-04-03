@@ -48,3 +48,5 @@ jobs:
           notion-key: ${{ secrets.NOTION_KEY }}
           notion-property-name: "Version Tag"
           notion-update-value: "${{ steps.version.outputs.new_tag }}"
+          notion-property-type: "multi_select"
+          existing-value: "append"
