@@ -455,8 +455,9 @@ const run = async () => {
 
   if (chartOptions.isSprintStart) {
     sprint += 1;
-    start = momentTz.tz(new Date(), "Asia/Singapore").format("YYYY-MM-DD");
-    end = start.add(15, "days");
+    const today = momentTz.tz(new Date(), "Asia/Singapore");
+    start = today.format("YYYY-MM-DD");
+    end = today.add(15, "days").format("YYYY-MM-DD");
     await createNewSprintSummary(
       notion.client,
       notion.databases.sprintSummary,
