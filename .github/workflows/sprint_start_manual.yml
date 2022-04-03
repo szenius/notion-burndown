@@ -1,4 +1,4 @@
-name: daily burndown (manual)
+name: sprint start (manual)
 
 on:
   workflow_dispatch:
@@ -21,12 +21,13 @@ jobs:
           NOTION_PROPERTY_SPRINT: Sprint
           NOTION_PROPERTY_ESTIMATE: Estimate
           NOTION_PROPERTY_PATTERN_STATUS_EXCLUDE: Completed
+          SPRINT_START: true
       - name: Commit burndown chart
         run: |
           git config --local user.email "ting.szeying@gmail.com"
           git config --local user.name "szenius"
           git add ./out
-          git commit -m "run: upload new burndown chart"
+          git commit -m "run: upload new burndown chart (sprint start)"
       - name: Push changes
         uses: ad-m/github-push-action@master
         with:

@@ -26,6 +26,7 @@ const parseConfig = () => {
       },
       chartOptions: {
         isIncludeWeekends: process.env.INCLUDE_WEEKENDS !== "false",
+        isSprintStart: process.env.SPRINT_START === "true",
       },
     };
   }
@@ -45,9 +46,45 @@ const parseConfig = () => {
     },
     chartOptions: {
       isIncludeWeekends: core.getInput("INCLUDE_WEEKENDS") !== "false",
+      isSprintStart: core.getInput("SPRINT_START") === "true",
     },
   };
 };
+
+const createNewSprintSummary = async (
+  notion,
+  sprintSummaryDb,
+  { sprint, start, end }
+) =>
+  notion.pages.create({
+    parent: {
+      database_id: sprintSummaryDb,
+    },
+    properties: {
+      Name: {
+        title: [
+          {
+            text: {
+              content: `Sprint ${sprint}`,
+            },
+          },
+        ],
+      },
+      Sprint: {
+        number: sprint,
+      },
+      Start: {
+        date: {
+          start,
+        },
+      },
+      End: {
+        date: {
+          end,
+        },
+      },
+    },
+  });
 
 const getLatestSprintSummary = async (
   notion,
@@ -226,6 +263,7 @@ const getPointsLeftByDay = async (
 
   return pointsLeftByDay;
 };
+
 /**
  * Generates the ideal burndown line for the sprint. Work is assumed to be done on
  * each weekday from {@link start} until the day before {@link end}. A data point is
@@ -292,6 +330,7 @@ const getIdealBurndown = (
 const getChartLabels = (numberOfDays) =>
   // cool way to generate numbers from 1 to n
   [...Array(numberOfDays).keys()].map((i) => i + 1);
+
 /**
  * Generates the data to be displayed on the chart. Work is assumed to be
  * done on each day from the start until the day before {@link end}.
@@ -401,14 +440,28 @@ const writeChartToFile = async (chart, dir, filenamePrefix) => {
 const run = async () => {
   const { notion, chartOptions } = parseConfig();
 
-  const { sprint, start, end } = await getLatestSprintSummary(
+  let sprint;
+  let start;
+  let end;
+  ({ sprint, start, end } = await getLatestSprintSummary(
     notion.client,
     notion.databases.sprintSummary,
     { sprintProp: notion.options.sprintProp }
-  );
+  ));
   log.info(
     JSON.stringify({ message: "Found latest sprint", sprint, start, end })
   );
+
+  if (chartOptions.isSprintStart) {
+    sprint += 1;
+    start = moment.tz(new Date(), "Asia/Singapore").format("YYYY-MM-DD");
+    end = start.add(15, "days");
+    await createNewSprintSummary(
+      notion.client,
+      notion.databases.sprintSummary,
+      { sprint, start, end }
+    );
+  }
 
   const pointsLeftInSprint = await countPointsLeftInSprint(
     notion.client,
