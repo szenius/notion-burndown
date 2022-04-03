@@ -1,5 +1,6 @@
 const { Client } = require("@notionhq/client");
 const moment = require("moment");
+const momentTz = require("moment-timezone");
 const ChartJSImage = require("chart.js-image");
 const log = require("loglevel");
 const fs = require("fs");
@@ -454,7 +455,7 @@ const run = async () => {
 
   if (chartOptions.isSprintStart) {
     sprint += 1;
-    start = moment.tz(new Date(), "Asia/Singapore").format("YYYY-MM-DD");
+    start = momentTz.tz(new Date(), "Asia/Singapore").format("YYYY-MM-DD");
     end = start.add(15, "days");
     await createNewSprintSummary(
       notion.client,
