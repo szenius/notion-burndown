@@ -33,7 +33,7 @@ jobs:
           force: true
       - name: Bump version and push tag
         id: version
-        uses: anothrNick/github-tag-action@1.35.0
+        uses: anothrNick/github-tag-action@1.36.0
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           WITH_V: false
