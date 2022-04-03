@@ -41,10 +41,12 @@ jobs:
           DEFAULT_BUMP: patch
           INITIAL_VERSION: 1.0.0
       - name: Update Notion property
-        uses: szenius/notion-update-page@1.1.4
+        uses: szenius/notion-update-page@1.1.12
         with:
           gh-username: "szenius"
           gh-token: ${{ secrets.GH_TOKEN }}
           notion-key: ${{ secrets.NOTION_KEY }}
           notion-property-name: "Version Tag"
           notion-update-value: "${{ steps.version.outputs.new_tag }}"
+          notion-property-type: "multi_select"
+          existing-value: "append"
