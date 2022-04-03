@@ -51,6 +51,41 @@ const parseConfig = () => {
   };
 };
 
+const createNewSprintSummary = async (
+  notion,
+  sprintSummaryDb,
+  { sprint, start, end }
+) =>
+  notion.pages.create({
+    parent: {
+      database_id: sprintSummaryDb,
+    },
+    properties: {
+      Name: {
+        title: [
+          {
+            text: {
+              content: `Sprint ${sprint}`,
+            },
+          },
+        ],
+      },
+      Sprint: {
+        number: sprint,
+      },
+      Start: {
+        date: {
+          start,
+        },
+      },
+      End: {
+        date: {
+          end,
+        },
+      },
+    },
+  });
+
 const getLatestSprintSummary = async (
   notion,
   sprintSummaryDb,
@@ -405,14 +440,28 @@ const writeChartToFile = async (chart, dir, filenamePrefix) => {
 const run = async () => {
   const { notion, chartOptions } = parseConfig();
 
-  const { sprint, start, end } = await getLatestSprintSummary(
+  let sprint;
+  let start;
+  let end;
+  ({ sprint, start, end } = await getLatestSprintSummary(
     notion.client,
     notion.databases.sprintSummary,
     { sprintProp: notion.options.sprintProp }
-  );
+  ));
   log.info(
     JSON.stringify({ message: "Found latest sprint", sprint, start, end })
   );
+
+  if (chartOptions.isSprintStart) {
+    sprint += 1;
+    start = moment.tz(new Date(), "Asia/Singapore").format("YYYY-MM-DD");
+    end = start.add(15, "days");
+    await createNewSprintSummary(
+      notion.client,
+      notion.databases.sprintSummary,
+      { sprint, start, end }
+    );
+  }
 
   const pointsLeftInSprint = await countPointsLeftInSprint(
     notion.client,
