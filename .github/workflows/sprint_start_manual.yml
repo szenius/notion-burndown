@@ -11,7 +11,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Install
-        run: npm run ci
+        run: npm ci
       - name: Generate burndown chart
         uses: ./
         with:
