@@ -433,7 +433,7 @@ const generateChart = (data, idealBurndown, labels) => {
 
 const writeChartToFile = async (chart, dir, filenamePrefix) => {
   if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir);
+    fs.mkdirSync(dir, { recursive: true });
   }
   await chart.toFile(`${dir}/${filenamePrefix}-burndown.png`);
 };
@@ -514,8 +514,8 @@ const run = async () => {
   log.info(JSON.stringify({ labels, data, idealBurndown }));
   const chart = generateChart(data, idealBurndown, labels);
 
-  await writeChartToFile(chart, "./out", `sprint${sprint}-${Date.now()}`);
-  await writeChartToFile(chart, "./out", `sprint${sprint}-latest`);
+  await writeChartToFile(chart, "./out/all", `sprint${sprint}-${Date.now()}`);
+  await writeChartToFile(chart, "./out/latest", `sprint${sprint}-latest`);
   log.info(
     JSON.stringify({ message: "Generated burndown chart", sprint, data })
   );
