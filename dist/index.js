@@ -18519,7 +18519,7 @@ const createNewSprintSummary = async (
       },
       End: {
         date: {
-          end,
+          start: end,
         },
       },
     },
