@@ -1,8 +1,8 @@
-name: daily burndown
+name: sprint daily
 
 on:
   schedule:
-    - cron: "0 0 * * *"
+    - cron: "0 0 * * *" # 8am daily
 
 jobs:
   generate_burndown_chart:

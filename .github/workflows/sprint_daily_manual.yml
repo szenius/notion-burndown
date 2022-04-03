@@ -1,4 +1,4 @@
-name: daily burndown (manual)
+name: sprint daily (manual)
 
 on:
   workflow_dispatch:
