@@ -23,17 +23,18 @@ You may refer to [this Notion page](https://szenius.notion.site/Notion-Burndown-
 
 This project is published as a GitHub action in the marketplace. You can make use of scheduled GitHub workflows to run it for free.
 
-```
+```yml
 uses: szenius/notion-burndown@1.0.0
 with:
-    NOTION_KEY: "Notion integration access token"
-    NOTION_DB_BACKLOG: "Notion Database ID of Sprint Backlog"
-    NOTION_DB_SPRINT_SUMMARY: "Notion Database ID of Sprint Summary"
-    NOTION_DB_DAILY_SUMMARY: "Notion Database ID of Daily Summary"
-    NOTION_PROPERTY_SPRINT: "Name of the property with the sprint number"
-    NOTION_PROPERTY_ESTIMATE: "Name of the property with the estimate"
-    NOTION_PROPERTY_PATTERN_STATUS_EXCLUDE: "Regex of the statuses of stories which are done"
-    INCLUDE_WEEKENDS: "True if weekends should be included in the chart, false otherwise."
+  NOTION_KEY: "Notion integration access token"
+  NOTION_DB_BACKLOG: "Notion Database ID of Sprint Backlog"
+  NOTION_DB_SPRINT_SUMMARY: "Notion Database ID of Sprint Summary"
+  NOTION_DB_DAILY_SUMMARY: "Notion Database ID of Daily Summary"
+  NOTION_PROPERTY_SPRINT: "Name of the property with the sprint number"
+  NOTION_PROPERTY_ESTIMATE: "Name of the property with the estimate"
+  NOTION_PROPERTY_PATTERN_STATUS_EXCLUDE: "Regex of the statuses of stories which are done"
+  INCLUDE_WEEKENDS: "True if weekends should be included in the chart, false otherwise."
+  SPRINT_START: "True if it is the start of a new sprint, false otherwise. When true, a new entry will be created in the Sprint Summary database, and the sprint end date will be 14 days later (sprint start day excluded)."
 ```
 
 See [the scheduled daily workflow](.github/workflows/on_daily.yml) as an example for how you can set up your own.

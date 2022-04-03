@@ -26,6 +26,7 @@ const parseConfig = () => {
       },
       chartOptions: {
         isIncludeWeekends: process.env.INCLUDE_WEEKENDS !== "false",
+        isSprintStart: process.env.SPRINT_START === "true",
       },
     };
   }
@@ -45,6 +46,7 @@ const parseConfig = () => {
     },
     chartOptions: {
       isIncludeWeekends: core.getInput("INCLUDE_WEEKENDS") !== "false",
+      isSprintStart: core.getInput("SPRINT_START") === "true",
     },
   };
 };
@@ -226,6 +228,7 @@ const getPointsLeftByDay = async (
 
   return pointsLeftByDay;
 };
+
 /**
  * Generates the ideal burndown line for the sprint. Work is assumed to be done on
  * each weekday from {@link start} until the day before {@link end}. A data point is
@@ -292,6 +295,7 @@ const getIdealBurndown = (
 const getChartLabels = (numberOfDays) =>
   // cool way to generate numbers from 1 to n
   [...Array(numberOfDays).keys()].map((i) => i + 1);
+
 /**
  * Generates the data to be displayed on the chart. Work is assumed to be
  * done on each day from the start until the day before {@link end}.

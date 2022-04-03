@@ -29,6 +29,10 @@ inputs:
     description: "True if weekends should be included in the chart, false otherwise."
     required: false
     default: "true"
+  SPRINT_START:
+    description: "True if it is the start of a new sprint, false otherwise. When true, a new entry will be created in the Sprint Summary database, and the sprint end date will be 14 days later (sprint start day excluded)."
+    required: false
+    default: "false"
 runs:
   using: "node12"
   main: "index.js"
