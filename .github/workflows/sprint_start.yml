@@ -2,7 +2,7 @@ name: sprint start
 
 on:
   schedule:
-    - cron: "0 10 * * *" # 6pm daily
+    - cron: "0 10 * * 0" # 6pm every sun
 
 jobs:
   generate_burndown_chart:
