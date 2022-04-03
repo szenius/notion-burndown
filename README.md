@@ -1,5 +1,7 @@
 # notion burndown
 
+![on_master](https://github.com/szenius/notion-burndown/actions/workflows/on_master.yml/badge.svg)
+
 Generates burndown charts based on Notion databases.
 
 This goes out to all of us who chose to put our scrum boards on Notion even though it doesn't have proper scrum features... Just because it's \*~aesthetic~\*.
@@ -24,7 +26,7 @@ You may refer to [this template](https://szenius.notion.site/Template-Notion-Bur
 This project is published as a GitHub action in the marketplace. You can make use of scheduled GitHub workflows to run it for free.
 
 ```yml
-uses: szenius/notion-burndown@1.0.13
+uses: szenius/notion-burndown@1.0.14
 with:
   NOTION_KEY: "Notion integration access token"
   NOTION_DB_BACKLOG: "Notion Database ID of Sprint Backlog"
