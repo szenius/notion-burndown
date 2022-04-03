@@ -458,7 +458,7 @@ const run = async () => {
     if (today.isSameOrAfter(moment(end))) {
       sprint += 1;
       start = today.format("YYYY-MM-DD");
-      end = today.add(15, "days").format("YYYY-MM-DD");
+      end = today.add(14, "days").format("YYYY-MM-DD");
       await createNewSprintSummary(
         notion.client,
         notion.databases.sprintSummary,
