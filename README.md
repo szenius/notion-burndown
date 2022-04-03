@@ -34,7 +34,7 @@ with:
   NOTION_PROPERTY_ESTIMATE: "Name of the property with the estimate"
   NOTION_PROPERTY_PATTERN_STATUS_EXCLUDE: "Regex of the statuses of stories which are done"
   INCLUDE_WEEKENDS: "True if weekends should be included in the chart, false otherwise."
-  SPRINT_START: "True if it is the start of a new sprint, false otherwise. When true, a new entry will be created in the Sprint Summary database, and the sprint end date will be 14 days later (sprint start day excluded)."
+  SPRINT_START: "True if it is the start of a new sprint, false otherwise. When true, a new entry will be created in the Sprint Summary database, and the sprint end date will be 14 days later (sprint start day excluded). Note that new sprint summary will not be created if today is still in the middle of the last sprint."
 ```
 
 See [the scheduled daily workflow](.github/workflows/on_daily.yml) as an example for how you can set up your own.

@@ -30,7 +30,7 @@ inputs:
     required: false
     default: "true"
   SPRINT_START:
-    description: "True if it is the start of a new sprint, false otherwise. When true, a new entry will be created in the Sprint Summary database, and the sprint end date will be 14 days later (sprint start day excluded)."
+    description: "True if it is the start of a new sprint, false otherwise. When true, a new entry will be created in the Sprint Summary database, and the sprint end date will be 14 days later (sprint start day excluded). Note that new sprint summary will not be created if today is still in the middle of the last sprint."
     required: false
     default: "false"
 runs:
