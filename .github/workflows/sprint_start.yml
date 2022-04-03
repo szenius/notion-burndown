@@ -10,7 +10,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - run: npm i
       - name: Generate burndown chart
         uses: ./
         with:
