@@ -18891,9 +18891,9 @@ const run = async () => {
     JSON.stringify({ message: "Found latest sprint", sprint, start, end })
   );
 
-  if (chartOptions.isSprintStart) {
+  const today = momentTz.tz(new Date(), "Asia/Singapore");
+  if (chartOptions.isSprintStart && today.isSameOrAfter(moment(end))) {
     sprint += 1;
-    const today = momentTz.tz(new Date(), "Asia/Singapore");
     start = today.format("YYYY-MM-DD");
     end = today.add(15, "days").format("YYYY-MM-DD");
     await createNewSprintSummary(
