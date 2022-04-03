@@ -454,15 +454,34 @@ const run = async () => {
   );
 
   const today = momentTz.tz(new Date(), "Asia/Singapore");
-  if (chartOptions.isSprintStart && today.isSameOrAfter(moment(end))) {
-    sprint += 1;
-    start = today.format("YYYY-MM-DD");
-    end = today.add(15, "days").format("YYYY-MM-DD");
-    await createNewSprintSummary(
-      notion.client,
-      notion.databases.sprintSummary,
-      { sprint, start, end }
-    );
+  if (chartOptions.isSprintStart) {
+    if (today.isSameOrAfter(moment(end))) {
+      sprint += 1;
+      start = today.format("YYYY-MM-DD");
+      end = today.add(15, "days").format("YYYY-MM-DD");
+      await createNewSprintSummary(
+        notion.client,
+        notion.databases.sprintSummary,
+        { sprint, start, end }
+      );
+      log.info(
+        JSON.stringify({
+          message: "Created new sprint summary",
+          sprint,
+          start,
+          end,
+        })
+      );
+    } else {
+      log.info(
+        JSON.stringify({
+          message: "Not sprint start. Skipping rest of steps.",
+          currSprintEnd: end,
+          today: today.format("YYYY-MM-DD"),
+        })
+      );
+      return;
+    }
   }
 
   const pointsLeftInSprint = await countPointsLeftInSprint(
