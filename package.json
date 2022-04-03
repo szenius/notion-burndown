@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "npx ncc build index.js --license licenses.txt",
-    "lint": "npx prettier --check .",
+    "lint": "npx prettier --check index.js",
     "lint:fix": "npx prettier --write .",
     "start": "node index.js",
     "start:dev": "NODE_ENV=offline node index.js"
