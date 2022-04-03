@@ -21,7 +21,7 @@ jobs:
           NOTION_DB_DAILY_SUMMARY: ef4f661300064ee48a907a3d1348767b
           NOTION_PROPERTY_SPRINT: Sprint
           NOTION_PROPERTY_ESTIMATE: Estimate
-          NOTION_PROPERTY_PATTERN_STATUS_EXCLUDE: Completed
+          NOTION_PROPERTY_PATTERN_STATUS_EXCLUDE: Completed|Released
           SPRINT_START: true
       - name: Commit burndown chart
         continue-on-error: true # not every run is at sprint start, so there may not be a chart
