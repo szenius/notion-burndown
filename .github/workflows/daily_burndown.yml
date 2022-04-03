@@ -1,4 +1,4 @@
-name: on daily
+name: daily burndown
 
 on:
   schedule:

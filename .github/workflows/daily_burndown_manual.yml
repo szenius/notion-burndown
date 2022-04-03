@@ -1,4 +1,4 @@
-name: on manual trigger
+name: daily burndown (manual)
 
 on:
   workflow_dispatch:
