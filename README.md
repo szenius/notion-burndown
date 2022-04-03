@@ -17,14 +17,14 @@ This goes out to all of us who chose to put our scrum boards on Notion even thou
       1. Compulsory fields: Sprint (number), Date (Date), Points (number)
 3. [Give your integration access to all 3 databases.](https://developers.notion.com/docs/getting-started#step-2-share-a-database-with-your-integration)
 
-You may refer to [this Notion page](https://szenius.notion.site/Notion-Burndown-Chart-390ba59cef094387900a26f75c108385) for setting up your own databases.
+You may refer to [this template](https://szenius.notion.site/Template-Notion-Burndown-Chart-ca567af7c1e34a9dadb56db8095b7349) for setting up your own databases.
 
 ### Step 2. Schedule the integration to run daily
 
 This project is published as a GitHub action in the marketplace. You can make use of scheduled GitHub workflows to run it for free.
 
 ```yml
-uses: szenius/notion-burndown@1.0.0
+uses: szenius/notion-burndown@1.0.13
 with:
   NOTION_KEY: "Notion integration access token"
   NOTION_DB_BACKLOG: "Notion Database ID of Sprint Backlog"
@@ -37,4 +37,7 @@ with:
   SPRINT_START: "True if it is the start of a new sprint, false otherwise. When true, a new entry will be created in the Sprint Summary database, and the sprint end date will be 14 days later (sprint start day excluded). Note that new sprint summary will not be created if today is still in the middle of the last sprint."
 ```
 
-See [the scheduled daily workflow](.github/workflows/on_daily.yml) as an example for how you can set up your own.
+You should set up two workflows:
+
+1. Workflow that runs at the start of each sprint - refer to [this workflow](.github/workflows/sprint_start.yml) for setting up your own
+2. Workflow that runs daily during the sprint - refer to [this workflow](.github/workflows/sprint_daily.yml) for setting up your own
