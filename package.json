@@ -1,6 +1,6 @@
 {
   "name": "notion",
-  "version": "1.0.0",
+  "version": "3.0.0",
   "description": "Burndown chart from Notion db",
   "main": "index.js",
   "scripts": {
